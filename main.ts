@@ -4,7 +4,9 @@ const appName = require('./package.json').name
 let mainWindow: BrowserWindow | null;
 
 const createWindow = () => {
-    mainWindow = new BrowserWindow({ width: 1024, height: 768, autoHideMenuBar: true });
+    let width: number = 1024;
+    let height: number = 768;
+    mainWindow = new BrowserWindow({ minWidth: width, minHeight: height, width: width, height: height, autoHideMenuBar: true });
     mainWindow.setMenuBarVisibility(false);
     mainWindow.setTitle(appName);
     if (process.env.NODE_ENV === 'development') {

@@ -12,12 +12,14 @@
             active-text-color="#ffd04b"
             style="padding-left: 45px"
           >
-            <el-menu-item index="1">文件转换</el-menu-item>
-            <el-menu-item index="2">模板管理</el-menu-item>
+            <el-menu-item index="/">文件转换</el-menu-item>
+            <el-menu-item index="/temp">模板管理</el-menu-item>
           </el-menu>
         </el-header>
         <el-main>
-          <router-view />
+          <transition name="el-zoom-in-top" :duration="80">
+            <router-view />
+          </transition>
         </el-main>
       </el-container>
     </div>
@@ -29,20 +31,28 @@ import Vue from "vue";
 import router from "vue-router";
 export default Vue.extend({
   data() {
+    let defaultIndex: string = "/";
+    let pathMap: { [index: string]: string } = {
+      "/": "/",
+      "/temp": "/temp"
+    };
     return {
-      activeIndex: "1",
-      path: {
-        "1": { path: "/" },
-        "2": { path: "/about" }
-      }
+      activeIndex: defaultIndex,
+      path: pathMap
     };
   },
   methods: {
     handleSelect(key: string): void {
       let dest: any = this.path[key];
-      console.log(dest);
-      this.$router.push(dest);
+      if (dest === this.$route.path) {
+        this.$router.go(0);
+      } else {
+        this.$router.push(dest);
+      }
     }
+  },
+  beforeUpdate: function() {
+    this.activeIndex = this.$route.path;
   }
 });
 </script>

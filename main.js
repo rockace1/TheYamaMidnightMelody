@@ -4,7 +4,9 @@ const electron_1 = require("electron");
 const appName = require('./package.json').name;
 let mainWindow;
 const createWindow = () => {
-    mainWindow = new electron_1.BrowserWindow({ width: 1024, height: 768, autoHideMenuBar: true });
+    let width = 1024;
+    let height = 768;
+    mainWindow = new electron_1.BrowserWindow({ minWidth: width, minHeight: height, width: width, height: height, autoHideMenuBar: true });
     mainWindow.setMenuBarVisibility(false);
     mainWindow.setTitle(appName);
     if (process.env.NODE_ENV === 'development') {
