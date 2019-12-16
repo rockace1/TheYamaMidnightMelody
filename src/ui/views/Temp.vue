@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main-container">
     <el-row style="margin-bottom: 15px;">
       <el-table :data="tableData" max-height="570" stripe style="width: 100%">
         <el-table-column prop="id" label="ID" width="180"></el-table-column>
@@ -48,21 +48,14 @@
             <el-input v-model="form.name" autocomplete="off"></el-input>
           </el-form-item>
           <template v-for="(col, index) in form.col">
-            <el-row :key="index">
-              <el-col :span="12" style="margin:5px;">
-                <el-form-item :label="'第'+(index+1)+'列'" :label-width="formLabelWidth">
-                  <el-input autocomplete="off" placeholder="表头名"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="8" style="margin:5px;">
-                <el-select v-model="form.region" placeholder="列类型">
-                  <template v-for="type in colType">
-                    <el-option :key="type.value" :label="type.name" value="type.value"></el-option>
-                  </template>
-                </el-select>
-              </el-col>
-              <el-col :span="4" style="margin:5px;"></el-col>
-            </el-row>
+            <ColumnEditor
+              :key="index"
+              :col="col"
+              :i="index"
+              @change="change"
+              @add="add"
+              @del="del"
+            />
           </template>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -76,9 +69,72 @@
 
 <script lang="ts">
 import Vue from "vue";
+import ColumnEditor from "../components/ColumnEditor.vue";
 export default Vue.extend({
   data() {
-    let table: any = [
+    let result: {
+      tableData: Array<{ id: number; name: string; date: string }>;
+      form: {
+        id: number | null;
+        name: string | null;
+        col: Array<{ name: string | null; type: number | null }>;
+      };
+      visible: boolean;
+      dialogFormVisible: boolean;
+      formLabelWidth: string;
+    } = {
+      tableData: [],
+      form: {
+        id: null,
+        name: null,
+        col: [
+          {
+            name: null,
+            type: 0
+          }
+        ]
+      },
+      visible: false,
+      dialogFormVisible: false,
+      formLabelWidth: "120px"
+    };
+    return result;
+  },
+  methods: {
+    toAdd(): void {
+      this.dialogFormVisible = true;
+      this.clearForm();
+    },
+    toUpdate(id: number): void {
+      this.dialogFormVisible = true;
+      console.log("update=", id);
+    },
+    toDelete(id: number, row: any): void {
+      row.visible = false;
+      console.log("delete=", id);
+    },
+    change(index: number, col: { name: string; type: number }): void {
+      console.log("change=", index, ",col=", JSON.stringify(col));
+    },
+    add(index: number): void {
+      const empty = { name: null, type: 0 };
+      let length: number = this.form.col.length;
+      let next: number = index + 1;
+      let left: Array<any> = this.form.col.slice(0, next);
+      let right: Array<any> = this.form.col.slice(next, length);
+      this.form.col = left.concat(empty, right);
+    },
+    del(index: number): void {
+      if (this.form.col.length > 1) {
+        this.form.col.splice(index, 1);
+      }
+    },
+    clearForm(): void {
+      this.form = { id: null, name: null, col: [{ name: null, type: 0 }] };
+    }
+  },
+  mounted: function() {
+    let table: Array<{ id: number; name: string; date: string }> = [
       {
         id: 100,
         date: "2016-05-02",
@@ -130,86 +186,10 @@ export default Vue.extend({
         name: "上海市普陀区金沙江路 1510 弄"
       }
     ];
-    let form: any = {
-      id: 100,
-      name: "呜哈哈",
-      col: [
-        {
-          name: "第一",
-          type: 1
-        },
-        {
-          name: "第二",
-          type: 2
-        }
-      ]
-    };
-    const colType: any = [
-      {
-        name: "常规",
-        value: 1
-      },
-      {
-        name: "数值",
-        value: 2
-      },
-      {
-        name: "货币",
-        value: 3
-      },
-      {
-        name: "会计专用",
-        value: 4
-      },
-      {
-        name: "日期",
-        value: 5
-      },
-      {
-        name: "时间",
-        value: 6
-      },
-      {
-        name: "百分比",
-        value: 7
-      },
-      {
-        name: "分数",
-        value: 8
-      },
-      {
-        name: "科学计数",
-        value: 9
-      },
-      {
-        name: "文本",
-        value: 10
-      }
-    ];
-    let result = {
-      tableData: table,
-      visible: false,
-      form: form,
-      colType: colType,
-      dialogFormVisible: false,
-      formLabelWidth: "120px"
-    };
-    return result;
-  },
-  methods: {
-    handleSelect(key: string): void {},
-    toAdd(): void {
-      this.dialogFormVisible = true;
-      console.log("add");
-    },
-    toUpdate(id: number): void {
-      this.dialogFormVisible = true;
-      console.log("update=", id);
-    },
-    toDelete(id: number, row: any): void {
-      row.visible = false;
-      console.log("delete=", id);
+    for (let t of table) {
+      this.tableData.push(t);
     }
-  }
+  },
+  components: { ColumnEditor }
 });
 </script>

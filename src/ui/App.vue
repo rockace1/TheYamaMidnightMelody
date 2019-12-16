@@ -17,7 +17,7 @@
           </el-menu>
         </el-header>
         <el-main>
-          <transition name="el-zoom-in-top" :duration="80">
+          <transition name="el-zoom-in-top" :duration="800">
             <router-view />
           </transition>
         </el-main>
@@ -64,6 +64,13 @@ export default Vue.extend({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+.main-container {
+  position: absolute;
+  width: calc(100% - 40px);
+  width: -webkit-calc(100% - 40px);
+  width: -moz-calc(100% - 40px);
 }
 
 #nav {

@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve-ui": "vue-cli-service serve",
-    "build-ui": "vue-cli-service build",
+    "serve-ui": "cross-env NODE_ENV=development vue-cli-service serve",
+    "build-ui": "cross-env NODE_ENV=development vue-cli-service build",
     "build-core": "tsc",
     "build": "vue-cli-service build && tsc",
     "test:unit": "vue-cli-service test:unit",
