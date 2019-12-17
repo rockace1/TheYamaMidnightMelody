@@ -13,8 +13,8 @@
       </el-select>
     </el-col>
     <el-col :span="4" style="margin:15px 0px 0px 0px;">
-      <i class="el-icon-circle-plus" style="margin-right:5px;cursor:pointer" @click="add(i)"></i>
-      <i class="el-icon-remove" style="margin-left:5px;cursor:pointer" @click="del(i)"></i>
+      <i class="el-icon-circle-plus icon" style="margin-right:5px;color:#2b8630" @click="add(i)"></i>
+      <i class="el-icon-remove icon" style="margin-left:5px;color:#ff4a4a" @click="del(i)"></i>
     </el-col>
   </el-row>
 </template>
@@ -89,3 +89,9 @@ export default Vue.extend({
   }
 });
 </script>
+<style scoped>
+.icon {
+  cursor: pointer;
+  font-size: 18px;
+}
+</style>

@@ -1,28 +1,26 @@
 <template>
   <div id="app">
-    <div id="nav" style="margin:0;padding:0;">
-      <el-container>
-        <el-header style="padding:0">
-          <el-menu
-            :default-active="activeIndex"
-            @select="handleSelect"
-            mode="horizontal"
-            background-color="#545c64"
-            text-color="#fff"
-            active-text-color="#ffd04b"
-            style="padding-left: 45px"
-          >
-            <el-menu-item index="/">文件转换</el-menu-item>
-            <el-menu-item index="/temp">模板管理</el-menu-item>
-          </el-menu>
-        </el-header>
-        <el-main>
-          <transition name="el-zoom-in-top" :duration="800">
-            <router-view />
-          </transition>
-        </el-main>
-      </el-container>
-    </div>
+    <el-container>
+      <el-header style="padding:0">
+        <el-menu
+          :default-active="activeIndex"
+          @select="handleSelect"
+          mode="horizontal"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b"
+          style="padding-left: 45px"
+        >
+          <el-menu-item index="/">文件转换</el-menu-item>
+          <el-menu-item index="/temp">模板管理</el-menu-item>
+        </el-menu>
+      </el-header>
+      <el-main style="padding:0">
+        <transition name="el-zoom-in-top" :duration="800">
+          <router-view />
+        </transition>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
@@ -68,21 +66,9 @@ export default Vue.extend({
 
 .main-container {
   position: absolute;
-  width: calc(100% - 40px);
-  width: -webkit-calc(100% - 40px);
-  width: -moz-calc(100% - 40px);
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+  width: 100%;
+  height: calc(100% - 60px);
+  height: -webkit-calc(100% - 60px);
+  height: -moz-calc(100% - 60px);
 }
 </style>

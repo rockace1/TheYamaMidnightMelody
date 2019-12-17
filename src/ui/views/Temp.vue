@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
-    <el-row style="margin-bottom: 15px;">
-      <el-table :data="tableData" max-height="570" stripe style="width: 100%">
+    <el-row class="list">
+      <el-table :data="tableData" :max-height="tableHeight" stripe style="width: 100%">
         <el-table-column prop="id" label="ID" width="180"></el-table-column>
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="date" label="日期" width="180"></el-table-column>
@@ -20,7 +20,7 @@
         </el-table-column>
       </el-table>
     </el-row>
-    <el-row>
+    <el-row class="footer">
       <el-col :span="4">
         <el-button type="primary" style="float:left;margin-left:20px" @click="toAdd()">新建</el-button>
       </el-col>
@@ -29,7 +29,8 @@
           style="float:right;margin-right:20px"
           background
           layout="prev, pager, next"
-          :total="21"
+          :total="total"
+          @current-change="query"
         ></el-pagination>
       </el-col>
     </el-row>
@@ -42,7 +43,7 @@
       >
         <el-form :model="form">
           <el-form-item label="模板ID" :label-width="formLabelWidth">
-            <el-input v-model="form.id" autocomplete="off" disabled></el-input>
+            <el-input v-model="form.id" autocomplete="off" readonly></el-input>
           </el-form-item>
           <el-form-item label="模板名称" :label-width="formLabelWidth">
             <el-input v-model="form.name" autocomplete="off"></el-input>
@@ -82,6 +83,7 @@ export default Vue.extend({
       visible: boolean;
       dialogFormVisible: boolean;
       formLabelWidth: string;
+      total: number;
     } = {
       tableData: [],
       form: {
@@ -96,7 +98,8 @@ export default Vue.extend({
       },
       visible: false,
       dialogFormVisible: false,
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      total: 0
     };
     return result;
   },
@@ -113,8 +116,11 @@ export default Vue.extend({
       row.visible = false;
       console.log("delete=", id);
     },
+    query(page: number): void {
+      console.log("query page=", page);
+    },
     change(index: number, col: { name: string; type: number }): void {
-      console.log("change=", index, ",col=", JSON.stringify(col));
+      this.form.col[index] = col;
     },
     add(index: number): void {
       const empty = { name: null, type: 0 };
@@ -190,6 +196,25 @@ export default Vue.extend({
       this.tableData.push(t);
     }
   },
+  computed: {
+    tableHeight: function() {
+      return document.documentElement.clientHeight-135;
+    }
+  },
   components: { ColumnEditor }
 });
 </script>
+
+<style scoped>
+.list {
+  margin: 0 0 0 20px;
+  width: calc(100% - 20px);
+}
+.footer {
+  position: absolute;
+  margin-top: 10px;
+  width: 100%;
+  height: 60px;
+  padding: 10px 0 0 45px;
+}
+</style>
