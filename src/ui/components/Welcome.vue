@@ -3,7 +3,12 @@
     <el-row class="file">
       <el-form :inline="true">
         <el-form-item label="文件路径">
-          <el-input placeholder="请选择要转换的文件" :value="tempFile" style="width:500px" readonly></el-input>
+          <el-input
+            placeholder="请选择要转换的文件"
+            :value="tempFile==null?'':tempFile.path"
+            style="min-width:350px"
+            disabled
+          ></el-input>
         </el-form-item>
         <el-form-item>
           <input
@@ -13,10 +18,15 @@
             accept="text/plain"
             @change="selectFile($event)"
           />
-          <el-button type="primary" @click="toSelectFile()">选择</el-button>
+          <el-button plain @click="toSelectFile()" :disabled="running">选择文件</el-button>
         </el-form-item>
-        <el-form-item>
-          <el-button type="success" @click="add2Array()">添加到队列</el-button>
+        <el-select v-model="tempFile.id" placeholder="选择模板" @change="selectTemplate">
+          <template v-for="(template,j) in templateData">
+            <el-option :key="j" :label="template.name" :value="template.id"></el-option>
+          </template>
+        </el-select>
+        <el-form-item style="margin-left:10px">
+          <el-button type="primary" @click="add2Array()" :disabled="running">添加到队列</el-button>
         </el-form-item>
       </el-form>
     </el-row>
@@ -27,6 +37,7 @@
         </el-table-column>
         <el-table-column prop="source" label="源文件名"></el-table-column>
         <el-table-column prop="dest" label="目标文件名"></el-table-column>
+        <el-table-column prop="tempId" label="适用模板" width="100"></el-table-column>
         <el-table-column label="是否完成" width="100">
           <template slot-scope="scope">
             <div v-if="running">
@@ -38,10 +49,35 @@
             </div>
           </template>
         </el-table-column>
+        <el-table-column label="操作" width="100">
+          <template slot-scope="scope">
+            <div v-if="running">
+              <i class="el-icon-error" style="font-size: 18px;" />
+            </div>
+            <div v-else>
+              <i
+                v-if="scope.row.finished"
+                class="el-icon-error"
+                style="cursor: not-allowed;font-size: 18px;"
+              />
+              <i
+                v-else
+                class="el-icon-error"
+                @click="del(scope.$index)"
+                style="color:#ff4a4a;cursor: pointer;font-size: 18px;"
+              />
+            </div>
+          </template>
+        </el-table-column>
       </el-table>
     </el-row>
     <el-row class="footer">
-      <span>File:D:\Documents\家乡荣耀地点词典.xlsx</span>
+      <el-col :span="20" align="left" style="margin:20px 0 0 45px">
+        <span style="color:#FFFFFF">File:D:\Documents\家乡荣耀地点词典.xlsx</span>
+      </el-col>
+      <el-col :span="2" style="margin-top:12px">
+        <el-button type="success" @click="run()" :disabled="running">开始</el-button>
+      </el-col>
     </el-row>
   </div>
 </template>
@@ -50,16 +86,20 @@
 import Vue from "vue";
 import path from "path";
 import moment from "moment";
+import { TempFile, Transfer, TemplateRecord } from "../model/Model";
+import { TemplateRecordArray, TransferArray } from "../model/Data";
 
 export default Vue.extend({
   data() {
     let result: {
-      tableData: Array<{ source: string; dest: string; finished: boolean }>;
-      tempFile: string | null;
+      tableData: Array<Transfer>;
+      templateData: Array<TemplateRecord>;
+      tempFile: TempFile;
       running: boolean;
     } = {
       tableData: [],
-      tempFile: null,
+      templateData: [],
+      tempFile: { id: null, path: null },
       running: false
     };
     return result;
@@ -78,22 +118,48 @@ export default Vue.extend({
       if (inputObj) {
         let file: string = inputObj.value;
         console.log(file);
-        this.tempFile = file;
+        if (this.tempFile == null) {
+          this.tempFile = { id: null, path: file };
+        }
+        this.tempFile.path = file;
       } else {
         console.log("where input?");
       }
     },
-    add2Array(): void {
-      if (this.tempFile != null) {
-        let name: string = this.tempFile;
-        let data: { source: string; dest: string; finished: boolean } = {
-          source: name,
-          dest: this.getFileName(name),
-          finished: false
-        };
-        this.tableData.push(data);
+    selectTemplate(id: number): void {
+      if (id) {
+        let templateId: number = id;
+        console.log(templateId);
+        if (this.tempFile == null) {
+          this.tempFile = { id: templateId, path: null };
+        }
+        this.tempFile.id = templateId;
+      } else {
+        console.log("where select?");
       }
-      this.tempFile = null;
+    },
+    add2Array(): void {
+      if (this.tempFile == null) {
+        console.log("tempFile is null");
+        return;
+      }
+      if (this.tempFile.id == null) {
+        console.log("temp id is null");
+        return;
+      }
+      if (this.tempFile.path == null) {
+        console.log("file is null");
+        return;
+      }
+      let filePath: string = this.tempFile.path;
+      let data: Transfer = {
+        source: filePath,
+        dest: this.getFileName(filePath),
+        finished: false,
+        tempId: this.tempFile.id
+      };
+      this.tableData.push(data);
+      this.tempFile = { id: null, path: null };
     },
     getFileName(name: string): string {
       let now = moment().format("YYYYMMDDHHmmss");
@@ -108,30 +174,51 @@ export default Vue.extend({
       row,
       rowIndex
     }: {
-      row: { source: string; dest: string; finished: boolean };
+      row: { finished: boolean };
       rowIndex: number;
     }): object | null {
       if (row.finished) {
         return { background: "#e4f8cf" };
       }
       return null;
+    },
+    del(index: number): void {
+      if (this.tableData.length > 1) {
+        this.tableData.splice(index, 1);
+      }
+    },
+    run(): void {
+      this.running = true;
+      let vue = this;
+      let length = this.tableData.length;
+      for (let i = 0; i < length; i++) {
+        let data: Transfer = vue.tableData[i];
+        setTimeout(() => {
+          vue.convertOne(data, () => {
+            if (vue.tableData.length == i + 1) {
+              vue.running = false;
+            }
+          });
+        }, i * 1000);
+      }
+    },
+    convertOne(data: Transfer, callback: Function): void {
+      if (data.finished) {
+        callback();
+        return;
+      }
+      setTimeout(() => {
+        data.finished = true;
+        callback();
+      }, 1000);
     }
   },
   mounted: function() {
-    let table: Array<{ source: string; dest: string; finished: boolean }> = [
-      {
-        source: "D:/Documents/家乡荣耀地点词典.txt",
-        dest: "D:/Documents/家乡荣耀地点词典.xlsx",
-        finished: false
-      },
-      {
-        source: "D:/Documents/家乡荣耀地点词典1.txt",
-        dest: "D:/Documents/家乡荣耀地点词典2.xlsx",
-        finished: true
-      }
-    ];
-    for (let t of table) {
+    for (let t of TransferArray) {
       this.tableData.push(t);
+    }
+    for (let t of TemplateRecordArray) {
+      this.templateData.push(t);
     }
   }
 });
@@ -158,7 +245,7 @@ export default Vue.extend({
   width: 100%;
   height: 60px;
   background-color: #545c64;
-  padding-left: 45px;
+  padding: 0;
 }
 .check-success {
   color: #2b8630;
