@@ -8,10 +8,10 @@ describe('Repo', () => {
 
     describe('#check template repo.', () => {
         it('save', async () => {
-            let col1: Column = new Column('col1', 1);
-            let col2: Column = new Column('col2', 2);
-            let col3: Column = new Column('col3', 3);
-            let template: Template = new Template('unit_test', new Date(), [col1, col2, col3]);
+            let col1: Column = new Column(1, 'col1');
+            let col2: Column = new Column(2, 'col2');
+            let col3: Column = new Column(3);
+            let template: Template = new Template([col1, col2, col3], 'unit_test', ',');
             console.log("perpare save:", JSON.stringify(template));
             await repo.save(template);
             console.log(JSON.stringify(template));
@@ -20,6 +20,13 @@ describe('Repo', () => {
         it('query', async () => {
             let result: Page<Template> = await repo.query(1, 10);
             console.log(JSON.stringify(result));
+        });
+        it('update', async () => {
+            let col1: Column = new Column(1, 'col11');
+            let col2: Column = new Column(2, 'col21');
+            let col3: Column = new Column(3, 'col31');
+            let template: Template = new Template([col1, col2, col3], 'unit_test2', '.', id);
+            await repo.update(template);
         });
         it('find', async () => {
             if (id === undefined) {

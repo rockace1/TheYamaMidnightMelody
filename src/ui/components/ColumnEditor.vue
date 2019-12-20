@@ -21,7 +21,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { ExcelColumn } from "../model/Model";
+// eslint-disable-next-line no-unused-vars
+import Column from "../../core/entity/Column";
 import { ColumnType } from "../model/Constant";
 
 export default Vue.extend({
@@ -30,7 +31,7 @@ export default Vue.extend({
     col: Object
   },
   methods: {
-    change(index: number, col: ExcelColumn): void {
+    change(index: number, col: Column): void {
       this.$emit("change", index, col);
     },
     add(index: number): void {

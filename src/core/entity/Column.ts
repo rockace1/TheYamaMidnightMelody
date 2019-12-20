@@ -1,13 +1,13 @@
 class Column {
 
-    constructor(name: string, type: number, tempId?: number) {
-        this.tempId = tempId;
-        this.name = name;
+    constructor(type: number, name?: string, tempId?: number) {
         this.type = type;
+        this.name = name;
+        this.tempId = tempId;
     }
 
     private tempId?: number;
-    private name: string;
+    private name?: string;
     private type: number;
 
 
@@ -26,7 +26,7 @@ class Column {
     }
 
 
-    public getName(): string {
+    public getName(): string | undefined {
         return this.name;
     }
 

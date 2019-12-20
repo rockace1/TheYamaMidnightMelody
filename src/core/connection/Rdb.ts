@@ -29,6 +29,4 @@ const init = async () => {
     }
 };
 
-init();
-
-export default db;
+export { db as default, init };

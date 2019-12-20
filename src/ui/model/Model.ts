@@ -10,16 +10,4 @@ interface Transfer {
     tempId: number;
 }
 
-interface ExcelColumn {
-    name: string | null;
-    type: number | null;
-}
-
-interface TemplateRecord {
-    id: number | null;
-    name: string | null;
-    date: string | null;
-    columns: Array<ExcelColumn>
-}
-
-export { Transfer, TempFile, ExcelColumn, TemplateRecord }
+export { Transfer, TempFile }

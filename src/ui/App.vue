@@ -26,7 +26,6 @@
 
 <script lang="ts">
 import Vue from "vue";
-import router from "vue-router";
 export default Vue.extend({
   data() {
     let defaultIndex: string = "/";

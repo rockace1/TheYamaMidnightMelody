@@ -2,17 +2,18 @@ import Column from './Column';
 
 class Template {
 
-    constructor(name: string, date: Date, columns: Array<Column>, id?: number) {
+    constructor(columns: Array<Column>, name?: string, delimiter?: string, id?: number) {
         this.id = id;
         this.name = name;
-        this.date = date;
+        this.delimiter = delimiter;
         this.columns = columns;
     }
 
     private id?: number;
-    private name: string;
-    private date: Date;
+    private name?: string;
+    private delimiter?: string;
     private columns: Array<Column>;
+    private readonly date!: Date;
 
 
     public setId(v: number) {
@@ -30,13 +31,8 @@ class Template {
     }
 
 
-    public getName(): string {
+    public getName(): string | undefined {
         return this.name;
-    }
-
-
-    public setDate(v: Date) {
-        this.date = v;
     }
 
 
@@ -52,6 +48,16 @@ class Template {
 
     public getColumns(): Array<Column> {
         return this.columns;
+    }
+
+
+    public setDelimiter(v: string) {
+        this.delimiter = v;
+    }
+
+
+    public getDelimiter(): string | undefined {
+        return this.delimiter;
     }
 
 

@@ -16,10 +16,10 @@ class ColumnModel extends Model<ColumnModel>{
     @Column(DataType.BIGINT)
     tempId!: number;
 
-    @AllowNull(false)
+    @AllowNull(true)
     @Comment('列名称')
     @Column(DataType.STRING)
-    name!: string;
+    name?: string;
 
     @AllowNull(false)
     @Comment('列类型')

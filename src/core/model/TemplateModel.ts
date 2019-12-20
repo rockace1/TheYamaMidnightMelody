@@ -1,5 +1,5 @@
 import {
-    Model, Table, Column, DataType, AutoIncrement, AllowNull, PrimaryKey, Comment, HasMany
+    Model, Table, Column, DataType, AutoIncrement, AllowNull, PrimaryKey, Comment, HasMany, CreatedAt
 } from 'sequelize-typescript';
 import ColumnModel from './ColumnModel';
 
@@ -19,9 +19,14 @@ class TemplateModel extends Model<TemplateModel>{
     name!: string;
 
     @AllowNull(false)
+    @Comment('分隔符')
+    @Column(DataType.STRING)
+    delimiter!: string;
+
     @Comment('创建时间')
+    @CreatedAt
     @Column(DataType.DATE)
-    date!: Date;
+    readonly date!: Date;
 
     @HasMany(() => ColumnModel)
     columns!: Array<ColumnModel>;

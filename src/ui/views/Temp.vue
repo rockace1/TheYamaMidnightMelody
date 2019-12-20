@@ -75,25 +75,20 @@
 <script lang="ts">
 import Vue from "vue";
 import ColumnEditor from "../components/ColumnEditor.vue";
-import { TemplateRecord, ExcelColumn } from "../model/Model";
-import { TemplateRecordArray } from "../model/Data";
+import Column from "../../core/entity/Column";
+import Template from "../../core/entity/Template";
 export default Vue.extend({
   data() {
     let result: {
-      tableData: Array<TemplateRecord>;
-      form: TemplateRecord;
+      tableData: Array<Template>;
+      form: Template;
       visible: boolean;
       dialogFormVisible: boolean;
       formLabelWidth: string;
       total: number;
     } = {
       tableData: [],
-      form: {
-        id: null,
-        name: null,
-        date: null,
-        columns: []
-      },
+      form: new Template([]),
       visible: false,
       dialogFormVisible: false,
       formLabelWidth: "120px",
@@ -122,36 +117,30 @@ export default Vue.extend({
     query(page: number): void {
       console.log("query page=", page);
     },
-    change(index: number, col: ExcelColumn): void {
-      this.form.columns[index] = col;
+    change(index: number, col: Column): void {
+      this.form.getColumns()[index] = col;
     },
     addColumn(index: number): void {
-      const empty = { name: null, type: 0 };
-      let length: number = this.form.columns.length;
+      let empty = new Column(0);
+      let length: number = this.form.getColumns().length;
       let next: number = index + 1;
-      let left: Array<ExcelColumn> = this.form.columns.slice(0, next);
-      let right: Array<ExcelColumn> = this.form.columns.slice(next, length);
-      this.form.columns = left.concat(empty, right);
+      let left: Array<Column> = this.form.getColumns().slice(0, next);
+      let right: Array<Column> = this.form.getColumns().slice(next, length);
+      this.form.setColumns(left.concat(empty, right));
     },
     delColumn(index: number): void {
-      if (this.form.columns.length > 1) {
-        this.form.columns.splice(index, 1);
+      if (this.form.getColumns().length > 1) {
+        this.form.getColumns().splice(index, 1);
       }
     },
     clearForm(): void {
-      this.form = {
-        id: null,
-        name: null,
-        date: null,
-        columns: [{ name: null, type: 0 }]
-      };
+      let empty: Array<Column> = [new Column(0)];
+      this.form = new Template(empty);
     }
   },
   mounted: function() {
-    let table = TemplateRecordArray;
-    for (let t of table) {
-      this.tableData.push(t);
-    }
+    let result = this.$query(1,10);
+    console.log(result);
   },
   computed: {
     tableHeight: function() {

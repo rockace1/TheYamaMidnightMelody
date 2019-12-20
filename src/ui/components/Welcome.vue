@@ -86,14 +86,17 @@
 import Vue from "vue";
 import path from "path";
 import moment from "moment";
-import { TempFile, Transfer, TemplateRecord } from "../model/Model";
+// eslint-disable-next-line no-unused-vars
+import { TempFile, Transfer } from "../model/Model";
+// eslint-disable-next-line no-unused-vars
+import Template from "../../core/entity/Template";
 import { TemplateRecordArray, TransferArray } from "../model/Data";
 
 export default Vue.extend({
   data() {
     let result: {
       tableData: Array<Transfer>;
-      templateData: Array<TemplateRecord>;
+      templateData: Array<Template>;
       tempFile: TempFile;
       running: boolean;
     } = {
@@ -171,8 +174,7 @@ export default Vue.extend({
       return result;
     },
     rowStyleName({
-      row,
-      rowIndex
+      row
     }: {
       row: { finished: boolean };
       rowIndex: number;
