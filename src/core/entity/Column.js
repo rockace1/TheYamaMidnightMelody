@@ -6,6 +6,9 @@ class Column {
         this.name = name;
         this.tempId = tempId;
     }
+    static from(data) {
+        return new Column(data.type, data.name, data.tempId);
+    }
     setTempId(v) {
         this.tempId = v;
     }

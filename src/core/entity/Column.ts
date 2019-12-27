@@ -1,4 +1,4 @@
-class Column {
+export default class Column {
 
     constructor(type: number, name?: string, tempId?: number) {
         this.type = type;
@@ -10,6 +10,9 @@ class Column {
     private name?: string;
     private type: number;
 
+    static from(data: Column): Column {
+        return new Column(data.type, data.name, data.tempId);
+    }
 
     public setTempId(v: number) {
         this.tempId = v;
@@ -40,10 +43,4 @@ class Column {
         return this.type
     }
 
-
-
-
-
 }
-
-export default Column

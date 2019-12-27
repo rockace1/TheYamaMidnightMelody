@@ -1,13 +1,14 @@
 interface TempFile {
-    id: number | null;
+    index: number | null;
     path: string | null;
 }
 
-interface Transfer {
+interface Doc {
     source: string;
     dest: string;
     finished: boolean;
     tempId: number;
+    tempName: string;
 }
 
-export { Transfer, TempFile }
+export { Doc, TempFile }

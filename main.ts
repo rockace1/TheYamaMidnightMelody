@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, globalShortcut } from 'electron';
 import database from './src/core/service/Service';
 const appName = require('./package.json').name
 
@@ -7,24 +7,26 @@ let mainWindow: BrowserWindow | null;
 const createWindow = () => {
     let width: number = 1024;
     let height: number = 768;
-    let preload:string = `${__dirname}\\Preload.js`;
+    let preload: string = `${__dirname}\\Preload.js`;
     mainWindow = new BrowserWindow({
         minWidth: width, minHeight: height,
         width: width, height: height,
-        autoHideMenuBar: false,
-        webPreferences: { 
+        webPreferences: {
             nodeIntegration: true,
             preload: preload
-         }
+        }
     });
-    mainWindow.setMenuBarVisibility(true);
-    mainWindow.setTitle(appName);
     if (process.env.NODE_ENV === 'development') {
+        mainWindow.setAutoHideMenuBar(false);
+        mainWindow.setMenuBarVisibility(true);
+        mainWindow.setTitle(appName);
+        mainWindow.webContents.openDevTools();
         mainWindow.loadURL('http://localhost:8000');
-        mainWindow.webContents.openDevTools;
     } else {
-        let path = `${__dirname}\\dist\\index.html`;
-        mainWindow.loadFile(path);
+        mainWindow.setAutoHideMenuBar(true);
+        mainWindow.setMenuBarVisibility(false);
+        mainWindow.setTitle(appName);
+        mainWindow.loadFile(`${__dirname}\\dist\\index.html`);
     }
 
     mainWindow.on('close', () => {
@@ -33,7 +35,14 @@ const createWindow = () => {
     database.initDatabase();
 }
 
-app.on('ready', createWindow);
+app.on('ready', async () => {
+    createWindow();
+    if (process.env.NODE_ENV !== 'development') {
+        globalShortcut.register('CmdOrCtrl+R', () => { });
+        globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
+        globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
+    }
+});
 
 app.on('window-all-closed', () => {
     if (process.platform != 'darwin') {

@@ -1,28 +1,94 @@
 import { init } from '../connection/Rdb';
 import Template from '../entity/Template';
-import Column from '../entity/Column';
 import Page from '../entity/Page';
+import Result from '../entity/Result';
+import { Doc } from '../../ui/model/Model';
 import Repo from '../repo/TemplateRepo';
+import Convertor from './Convertor';
 import { ipcMain } from 'electron';
 
 const initDatabase = (): void => {
     init();
 }
 
-ipcMain.on('queryTemplate', (event, args) => {
+ipcMain.on('convertDoc', (event, data: { index: number, data: Doc }) => {
+    try {
+        Convertor.convert(data.data, () => {
+            let result: Result<void> = Result.getSuccess();
+            event.reply('convertDone', { index: data.index, result: result });
+        });
+    } catch (err) {
+        let result: Result<void> = Result.getFail(err.stack);
+        event.reply('convertDone', { index: data.index, result: result });
+    }
+});
+
+ipcMain.on('queryTemplate', (event, param: { pageNum: number, size: number }) => {
     let pageNum = 1;
-    if (args.pageNum > 1) {
-        pageNum = args.pageNum;
+    if (param.pageNum > 1) {
+        pageNum = param.pageNum;
     }
     let size = 10;
-    if (args.size > 10 && args.size < 100) {
-        size = args.size;
+    if (param.size > 10) {
+        size = param.size;
     }
-    Repo.query(pageNum, size).then((data) => {
-        event.returnValue = data;
-        console.log('return data:',data);
+    Repo.query(pageNum, size).then((data: Page<Template>) => {
+        event.returnValue = Result.getSuccessWith(data);
     }).catch((err) => {
-        console.error(err);
+        event.returnValue = Result.getFail(err.stack);
+    })
+});
+
+ipcMain.on('allTemplate', (event) => {
+    Repo.all().then((data: Array<Template>) => {
+        event.returnValue = Result.getSuccessWith(data);
+    }).catch((err) => {
+        event.returnValue = Result.getFail(err.stack);
+    })
+});
+
+ipcMain.on('createTemplate', (event, data: Template) => {
+    data = Template.from(data);
+    Repo.save(data).then(() => {
+        event.returnValue = Result.getSuccess();
+    }).catch((err) => {
+        event.returnValue = Result.getFail(err.stack);
+    })
+});
+
+ipcMain.on('destroyTemplate', (event, id: number) => {
+    Repo.destroy(id).then(() => {
+        event.returnValue = Result.getSuccess();
+    }).catch((err) => {
+        event.returnValue = Result.getFail(err.stack);
+    })
+});
+
+ipcMain.on('updateTemplate', (event, data: Template) => {
+    data = Template.from(data);
+    let id = data.getId();
+    if (id === undefined) {
+        throw Error("template id cannot null.")
+    }
+    Repo.find(id).then((exist) => {
+        if (exist === null) {
+            throw Error("template " + id + " not exist.");
+        }
+        Repo.update(data).then(() => {
+            event.returnValue = Result.getSuccess();
+        }).catch((err) => {
+            event.returnValue = Result.getFail(err.stack);
+        })
+    }).catch((err) => {
+        event.returnValue = Result.getFail(err.stack);
+    });
+});
+
+ipcMain.on('findTemplate', (event, id: number) => {
+    Repo.find(id).then((data) => {
+        event.returnValue = Result.getSuccessWith(data);
+    }).catch((err) => {
+        event.returnValue = Result.getFail(err.stack);
     })
 });
 

@@ -1,20 +1,33 @@
 import Column from './Column';
+import moment from 'moment';
 
-class Template {
+export default class Template {
 
-    constructor(columns: Array<Column>, name?: string, delimiter?: string, id?: number) {
+    constructor(columns: Array<Column>, name?: string, delimiter?: string, id?: number, date?: Date) {
         this.id = id;
         this.name = name;
         this.delimiter = delimiter;
         this.columns = columns;
+        this.date = date;
     }
 
     private id?: number;
     private name?: string;
     private delimiter?: string;
     private columns: Array<Column>;
-    private readonly date!: Date;
+    private date?: Date;
 
+    static from(data: Template): Template {
+        let result: Template = new Template([]);
+        result.id = data.id;
+        result.name = data.name;
+        result.delimiter = data.delimiter;
+        result.date = data.date;
+        for (let c of data.columns) {
+            result.columns.push(Column.from(c));
+        }
+        return result;
+    }
 
     public setId(v: number) {
         this.id = v;
@@ -36,7 +49,7 @@ class Template {
     }
 
 
-    public getDate(): Date {
+    public getDate(): Date | undefined {
         return this.date;
     }
 
@@ -60,12 +73,4 @@ class Template {
         return this.delimiter;
     }
 
-
-
-
-
-
-
 }
-
-export default Template

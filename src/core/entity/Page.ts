@@ -1,14 +1,26 @@
-class Page<T> {
+export default class Page<T> {
     private rows: Array<T>;
     private count: number;
     private page: number = 1;
-    private pageCount?: number;
+    private pageCount: number = 0;
     private pageSize: number = 10;
 
     constructor(data: { rows: Array<T>, count: number }) {
         this.rows = data.rows;
         this.count = data.count;
     }
+
+    static from(data: Page<any>, supplier: Function): Page<any> {
+        let p = new Page({ rows: new Array(), count: 0 });
+        p.count = data.count;
+        p.page = data.page;
+        p.pageSize = data.pageSize;
+        for (let t of data.rows) {
+            p.rows.push(supplier(t));
+        }
+        return p;
+    }
+
     setCurrent(page: number): void {
         if (page < 1) {
             page = 1;
@@ -27,6 +39,10 @@ class Page<T> {
         return this.page;
     }
 
+    getCount(): number {
+        return this.count;
+    }
+
     getData(): Array<T> {
         return this.rows;
     }
@@ -41,5 +57,3 @@ class Page<T> {
         return this.pageCount;
     }
 }
-
-export default Page

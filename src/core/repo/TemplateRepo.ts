@@ -53,10 +53,6 @@ const update = async (data: Template): Promise<void> => {
         if (id === undefined) {
             throw Error("template id cannot null.")
         }
-        let exist = await TemplateModel.findByPk(id);
-        if (exist === null) {
-            throw Error("template " + id + " not exist.");
-        }
         let columnNum = await ColumnModel.destroy({
             where: { tempId: id },
             transaction: t
@@ -94,13 +90,28 @@ const query = async (pageNum: number, size: number): Promise<Page<Template>> => 
     let array: Array<Template> = [];
     for (let t of result.rows) {
         let columns: Array<Column> = [];
-        let temp = new Template(columns, t.name, t.delimiter, t.id);
+        let temp = new Template(columns, t.name, t.delimiter, t.id, t.date);
         array.push(temp);
     }
     let page = new Page({ rows: array, count: result.count });
     page.setCurrent(pageNum);
     page.setSize(size);
     return page;
+}
+
+const all = async (): Promise<Array<Template>> => {
+    let result: Array<TemplateModel> = await TemplateModel.findAll({
+        order: [
+            ['ID', 'DESC']
+        ]
+    });
+    let array: Array<Template> = [];
+    for (let t of result) {
+        let columns: Array<Column> = [];
+        let temp = new Template(columns, t.name, t.delimiter, t.id, t.date);
+        array.push(temp);
+    }
+    return array;
 }
 
 const find = async (id: number): Promise<Template | null> => {
@@ -118,7 +129,7 @@ const find = async (id: number): Promise<Template | null> => {
         let c = new Column(col.type, col.name, col.tempId);
         columns.push(c);
     }
-    return new Template(columns, data.name, data.delimiter, data.id);
+    return new Template(columns, data.name, data.delimiter, data.id, data.date);
 }
 
-export default { save, query, find, destroy, update }
+export default { save, query, find, destroy, update, all }

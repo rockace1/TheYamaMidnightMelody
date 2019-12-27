@@ -4,10 +4,14 @@
       <el-table :data="tableData" :max-height="tableHeight" stripe style="width: 100%">
         <el-table-column prop="id" label="ID" width="180"></el-table-column>
         <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column prop="date" label="日期" width="180"></el-table-column>
+        <el-table-column label="创建日期" width="180">
+          <template slot-scope="scope">
+            <span>{{ formateDate(scope.row.date) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
-            <el-button type="text" size="small" @click="toUpdate(scope.row.id)">编辑</el-button>
+            <el-button type="text" size="small" @click="openUpdateForm(scope.row.id)">编辑</el-button>
             <el-popover placement="top" width="160" v-model="scope.row.visible" :ref="scope.$index">
               <p>这是一段内容这是一段内容确定删除吗？</p>
               <div style="text-align: right; margin: 0">
@@ -26,14 +30,14 @@
     </el-row>
     <el-row class="footer">
       <el-col :span="4">
-        <el-button type="primary" style="float:left;margin-left:20px" @click="toAdd()">新建</el-button>
+        <el-button type="primary" style="float:left;margin-left:20px" @click="openInsertForm()">新建</el-button>
       </el-col>
       <el-col :span="20">
         <el-pagination
           style="float:right;margin-right:20px"
           background
           layout="prev, pager, next"
-          :total="total"
+          :total="count"
           @current-change="query"
         ></el-pagination>
       </el-col>
@@ -52,6 +56,9 @@
           <el-form-item label="模板名称" :label-width="formLabelWidth">
             <el-input v-model="form.name" autocomplete="off"></el-input>
           </el-form-item>
+          <el-form-item label="字段分隔符" :label-width="formLabelWidth">
+            <el-input v-model="form.delimiter" autocomplete="off"></el-input>
+          </el-form-item>
           <template v-for="(col, index) in form.columns">
             <ColumnEditor
               :key="index"
@@ -65,7 +72,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="add()">确 定</el-button>
+          <el-button type="primary" @click="save()">确 定</el-button>
         </div>
       </el-dialog>
     </el-row>
@@ -74,9 +81,15 @@
 
 <script lang="ts">
 import Vue from "vue";
+import moment from "moment";
 import ColumnEditor from "../components/ColumnEditor.vue";
 import Column from "../../core/entity/Column";
 import Template from "../../core/entity/Template";
+// eslint-disable-next-line no-unused-vars
+import Page from "../../core/entity/Page";
+// eslint-disable-next-line no-unused-vars
+import Result from "../../core/entity/Result";
+
 export default Vue.extend({
   data() {
     let result: {
@@ -85,37 +98,77 @@ export default Vue.extend({
       visible: boolean;
       dialogFormVisible: boolean;
       formLabelWidth: string;
-      total: number;
+      count: number;
+      current: number;
+      updateFlag: boolean;
     } = {
       tableData: [],
       form: new Template([]),
       visible: false,
       dialogFormVisible: false,
       formLabelWidth: "120px",
-      total: 0
+      count: 0,
+      current: 1,
+      updateFlag: false
     };
     return result;
   },
   methods: {
-    toAdd(): void {
-      this.dialogFormVisible = true;
+    openInsertForm(): void {
       this.clearForm();
-    },
-    add(): void {
-      this.tableData.push(this.form);
-      this.clearForm();
-      this.dialogFormVisible = false;
-    },
-    toUpdate(id: number): void {
       this.dialogFormVisible = true;
-      console.log("update=", id);
+      this.updateFlag = false;
+    },
+    save(): void {
+      if (!this.templateValidator(this.updateFlag)) {
+        return;
+      }
+      let func: Function = this.$remote.create;
+      let errMsg: string = "新增模板异常";
+      if (this.updateFlag) {
+        func = this.$remote.update;
+        errMsg = "更新模板[" + this.form.getId() + "]异常";
+      }
+      let result: Result<void> = func(this.form);
+      if (result.success) {
+        this.clearForm();
+        this.dialogFormVisible = false;
+        this.query(this.current);
+      } else {
+        this.$error(errMsg, this);
+      }
+    },
+    openUpdateForm(id: number): void {
+      this.clearForm();
+      this.dialogFormVisible = true;
+      this.updateFlag = true;
+      let result: Result<Template> = this.$remote.find(id);
+      if (!result.success || this.isEmpty(result.data)) {
+        this.$error("查询模板信息异常", this);
+      } else {
+        this.form = result.data!;
+      }
     },
     deleteRecord(id: number, row: any): void {
-      row.visible = false;
-      console.log("delete=", id);
+      let result: Result<void> = this.$remote.destroy(id);
+      if (result.success) {
+        this.query(this.current);
+        row.visible = false;
+      } else {
+        this.$error("删除模板异常", this);
+      }
     },
     query(page: number): void {
-      console.log("query page=", page);
+      let result: Result<Page<Template>> = this.$remote.query(page);
+      if (result.success) {
+        this.tableData = [];
+        for (let t of result.data!.getData()) {
+          this.tableData.push(t);
+        }
+        this.count = result.data!.getCount();
+      } else {
+        this.$error("查询模板异常", this);
+      }
     },
     change(index: number, col: Column): void {
       this.form.getColumns()[index] = col;
@@ -136,11 +189,36 @@ export default Vue.extend({
     clearForm(): void {
       let empty: Array<Column> = [new Column(0)];
       this.form = new Template(empty);
+    },
+    templateValidator(checkId: boolean): boolean {
+      let data = this.form;
+      if (checkId && this.isEmpty(data.getId())) {
+        this.$warning("ID不能为空", this);
+        return false;
+      }
+      if (this.isEmpty(data.getName())) {
+        this.$warning("模板名称不能为空", this);
+        return false;
+      }
+      if (this.isEmpty(data.getColumns()) || data.getColumns().length < 1) {
+        this.$warning("列定义不能为空", this);
+        return false;
+      }
+      if (this.isEmpty(data.getDelimiter())) {
+        this.$warning("模板分隔符不能为空", this);
+        return false;
+      }
+      return true;
+    },
+    isEmpty(value: any): boolean {
+      return value === null || value === undefined || value === "";
+    },
+    formateDate(date: Date): string {
+      return moment(date).format("YYYY-MM-DD HH:mm:ss");
     }
   },
   mounted: function() {
-    let result = this.$query(1,10);
-    console.log(result);
+    this.query(this.current);
   },
   computed: {
     tableHeight: function() {

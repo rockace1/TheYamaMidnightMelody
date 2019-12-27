@@ -1,6 +1,6 @@
-import { TemplateRecord, Transfer } from './Model';
+import { TemplateRecord, Doc } from './Model';
 
-const TransferArray: Array<Transfer> = [
+const DocArray: Array<Doc> = [
     {
         source: "D:\\Documents\\家乡荣耀地点词典.txt",
         dest: "D:\\Documents\\家乡荣耀地点词典.xlsx",
@@ -78,4 +78,4 @@ const TemplateRecordArray: Array<TemplateRecord> = [
     }
 ];
 
-export { TemplateRecordArray, TransferArray }
+export { TemplateRecordArray, DocArray }

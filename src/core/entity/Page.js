@@ -3,9 +3,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Page {
     constructor(data) {
         this.page = 1;
+        this.pageCount = 0;
         this.pageSize = 10;
         this.rows = data.rows;
         this.count = data.count;
+    }
+    static from(data, supplier) {
+        let p = new Page({ rows: new Array(), count: 0 });
+        p.count = data.count;
+        p.page = data.page;
+        p.pageSize = data.pageSize;
+        for (let t of data.rows) {
+            p.rows.push(supplier(t));
+        }
+        return p;
     }
     setCurrent(page) {
         if (page < 1) {
@@ -21,6 +32,9 @@ class Page {
     }
     getCurrent() {
         return this.page;
+    }
+    getCount() {
+        return this.count;
     }
     getData() {
         return this.rows;

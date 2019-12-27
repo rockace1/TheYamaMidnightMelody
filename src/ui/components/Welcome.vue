@@ -20,13 +20,13 @@
           />
           <el-button plain @click="toSelectFile()" :disabled="running">选择文件</el-button>
         </el-form-item>
-        <el-select v-model="tempFile.id" placeholder="选择模板" @change="selectTemplate">
+        <el-select v-model="tempFile.index" placeholder="选择模板" @change="selectTemplate">
           <template v-for="(template,j) in templateData">
-            <el-option :key="j" :label="template.name" :value="template.id"></el-option>
+            <el-option :key="j" :label="template.name" :value="j"></el-option>
           </template>
         </el-select>
         <el-form-item style="margin-left:10px">
-          <el-button type="primary" @click="add2Array()" :disabled="running">添加到队列</el-button>
+          <el-button type="primary" @click="add2Queue()" :disabled="running">添加到队列</el-button>
         </el-form-item>
       </el-form>
     </el-row>
@@ -37,7 +37,7 @@
         </el-table-column>
         <el-table-column prop="source" label="源文件名"></el-table-column>
         <el-table-column prop="dest" label="目标文件名"></el-table-column>
-        <el-table-column prop="tempId" label="适用模板" width="100"></el-table-column>
+        <el-table-column prop="tempName" label="适用模板" width="100"></el-table-column>
         <el-table-column label="是否完成" width="100">
           <template slot-scope="scope">
             <div v-if="running">
@@ -52,7 +52,7 @@
         <el-table-column label="操作" width="100">
           <template slot-scope="scope">
             <div v-if="running">
-              <i class="el-icon-error" style="font-size: 18px;" />
+              <i class="el-icon-error" style="cursor: not-allowed;font-size: 18px;" />
             </div>
             <div v-else>
               <i
@@ -72,8 +72,9 @@
       </el-table>
     </el-row>
     <el-row class="footer">
-      <el-col :span="20" align="left" style="margin:20px 0 0 45px">
-        <span style="color:#FFFFFF">File:D:\Documents\家乡荣耀地点词典.xlsx</span>
+      <el-col :span="20" align="left" style="margin:20px 0 0 45px;color:#aaaaaa">
+        <span v-if="runningFile">正在转换：</span>
+        <span>{{ runningFile }}</span>
       </el-col>
       <el-col :span="2" style="margin-top:12px">
         <el-button type="success" @click="run()" :disabled="running">开始</el-button>
@@ -87,82 +88,82 @@ import Vue from "vue";
 import path from "path";
 import moment from "moment";
 // eslint-disable-next-line no-unused-vars
-import { TempFile, Transfer } from "../model/Model";
+import { TempFile, Doc } from "../model/Model";
 // eslint-disable-next-line no-unused-vars
 import Template from "../../core/entity/Template";
-import { TemplateRecordArray, TransferArray } from "../model/Data";
+// eslint-disable-next-line no-unused-vars
+import Page from "../../core/entity/Page";
+// eslint-disable-next-line no-unused-vars
+import Result from "../../core/entity/Result";
+import messenger from "../router/messenger";
 
 export default Vue.extend({
   data() {
     let result: {
-      tableData: Array<Transfer>;
+      tableData: Array<Doc>;
+      runningData: Array<{ index: number; data: Doc }>;
       templateData: Array<Template>;
       tempFile: TempFile;
       running: boolean;
+      runningFile: string;
     } = {
       tableData: [],
+      runningData: [],
       templateData: [],
-      tempFile: { id: null, path: null },
-      running: false
+      tempFile: { index: null, path: null },
+      running: false,
+      runningFile: ""
     };
     return result;
   },
   methods: {
     toSelectFile(): void {
       let inputObj: any = this.$refs["fileSelector"];
-      if (inputObj) {
-        inputObj.click();
-      } else {
-        console.log("where input?");
-      }
+      inputObj.value = null;
+      inputObj.click();
     },
     selectFile(event: any): void {
       let inputObj = event.currentTarget;
-      if (inputObj) {
-        let file: string = inputObj.value;
-        console.log(file);
-        if (this.tempFile == null) {
-          this.tempFile = { id: null, path: file };
-        }
-        this.tempFile.path = file;
-      } else {
-        console.log("where input?");
-      }
-    },
-    selectTemplate(id: number): void {
-      if (id) {
-        let templateId: number = id;
-        console.log(templateId);
-        if (this.tempFile == null) {
-          this.tempFile = { id: templateId, path: null };
-        }
-        this.tempFile.id = templateId;
-      } else {
-        console.log("where select?");
-      }
-    },
-    add2Array(): void {
+      let file: string = inputObj.files[0].path;
       if (this.tempFile == null) {
-        console.log("tempFile is null");
+        this.tempFile = { index: null, path: null };
+      }
+      this.tempFile.path = file;
+    },
+    selectTemplate(index: number): void {
+      if (this.tempFile == null) {
+        this.tempFile = { index: null, path: null };
+      }
+      this.tempFile.index = index;
+    },
+    add2Queue(): void {
+      if (this.tempFile.path === null) {
+        this.$warning("请选择文件", this);
         return;
       }
-      if (this.tempFile.id == null) {
-        console.log("temp id is null");
-        return;
-      }
-      if (this.tempFile.path == null) {
-        console.log("file is null");
+      if (this.tempFile.index === null) {
+        this.$warning("请选择模板", this);
         return;
       }
       let filePath: string = this.tempFile.path;
-      let data: Transfer = {
+      let temp: Template = this.templateData[this.tempFile.index];
+      if (
+        temp === null ||
+        temp.getId() === undefined ||
+        temp.getName === undefined
+      ) {
+        this.$error("模板数据异常", this);
+        return;
+      }
+      let data: Doc = {
         source: filePath,
         dest: this.getFileName(filePath),
         finished: false,
-        tempId: this.tempFile.id
+        tempId: temp.getId()!,
+        tempName: temp.getName()!
       };
       this.tableData.push(data);
-      this.tempFile = { id: null, path: null };
+      this.tempFile = { index: null, path: null };
     },
     getFileName(name: string): string {
       let now = moment().format("YYYYMMDDHHmmss");
@@ -185,43 +186,83 @@ export default Vue.extend({
       return null;
     },
     del(index: number): void {
-      if (this.tableData.length > 1) {
+      if (this.tableData.length > 0) {
         this.tableData.splice(index, 1);
       }
     },
     run(): void {
-      this.running = true;
-      let vue = this;
       let length = this.tableData.length;
-      for (let i = 0; i < length; i++) {
-        let data: Transfer = vue.tableData[i];
-        setTimeout(() => {
-          vue.convertOne(data, () => {
-            if (vue.tableData.length == i + 1) {
-              vue.running = false;
-            }
-          });
-        }, i * 1000);
-      }
-    },
-    convertOne(data: Transfer, callback: Function): void {
-      if (data.finished) {
-        callback();
+      if (length < 1) {
+        this.$warning("请向队列添加待转换文件", this);
         return;
       }
-      setTimeout(() => {
-        data.finished = true;
-        callback();
-      }, 1000);
+      this.runningData = [];
+      for (let i = 0; i < length; i++) {
+        let data: Doc = this.tableData[i];
+        if (data.finished) {
+          continue;
+        }
+        this.runningData.push({ index: i, data: data });
+      }
+      if (this.runningData.length < 1) {
+        this.$warning("请向队列添加待转换文件", this);
+        return;
+      }
+      let param = this.runningData.pop()!;
+      this.convertOne(param.index, param.data);
+      messenger.$emit("lock");
+    },
+    convertOne(index: number, data: Doc): void {
+      this.runningFile = data.dest;
+      this.$remote.convert(data, index);
+    },
+    checkFinish(): boolean {
+      let rest: number = this.runningData.length;
+      let finished = rest === 0;
+      if (finished) {
+        messenger.$emit("unlock");
+      }
+      return finished;
     }
   },
   mounted: function() {
-    for (let t of TransferArray) {
-      this.tableData.push(t);
+    let result: Result<Array<Template>> = this.$remote.all();
+    if (result.success) {
+      this.templateData = result.data!;
+    } else {
+      this.$error("获取模板信息异常", this);
     }
-    for (let t of TemplateRecordArray) {
-      this.templateData.push(t);
-    }
+  },
+  created: function() {
+    let v = this;
+    messenger.$on("lock", () => {
+      v.running = true;
+    });
+    messenger.$on("unlock", () => {
+      v.runningFile = "";
+      v.running = false;
+    });
+    messenger.$on(
+      "convertDone",
+      (response: { index: number; result: Result<void> }) => {
+        console.log("response:", response);
+        let data: Doc = v.tableData[response.index];
+        if (data !== undefined) {
+          if (response.result.success) {
+            data.finished = true;
+            v.$success("文件[" + data.dest + "]转换成功", v);
+          } else {
+            v.$error("文件[" + data.dest + "]转换异常", v);
+          }
+        }
+        if (!v.checkFinish()) {
+          let param = v.runningData.pop();
+          if (param !== undefined) {
+            v.convertOne(param.index, param.data);
+          }
+        }
+      }
+    );
   }
 });
 </script>

@@ -52,10 +52,6 @@ const update = (data) => tslib_1.__awaiter(void 0, void 0, void 0, function* () 
         if (id === undefined) {
             throw Error("template id cannot null.");
         }
-        let exist = yield TemplateModel_1.default.findByPk(id);
-        if (exist === null) {
-            throw Error("template " + id + " not exist.");
-        }
         let columnNum = yield ColumnModel_1.default.destroy({
             where: { tempId: id },
             transaction: t
@@ -92,13 +88,27 @@ const query = (pageNum, size) => tslib_1.__awaiter(void 0, void 0, void 0, funct
     let array = [];
     for (let t of result.rows) {
         let columns = [];
-        let temp = new Template_1.default(columns, t.name, t.delimiter, t.id);
+        let temp = new Template_1.default(columns, t.name, t.delimiter, t.id, t.date);
         array.push(temp);
     }
     let page = new Page_1.default({ rows: array, count: result.count });
     page.setCurrent(pageNum);
     page.setSize(size);
     return page;
+});
+const all = () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    let result = yield TemplateModel_1.default.findAll({
+        order: [
+            ['ID', 'DESC']
+        ]
+    });
+    let array = [];
+    for (let t of result) {
+        let columns = [];
+        let temp = new Template_1.default(columns, t.name, t.delimiter, t.id, t.date);
+        array.push(temp);
+    }
+    return array;
 });
 const find = (id) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     let data = yield TemplateModel_1.default.findByPk(id, {
@@ -115,7 +125,7 @@ const find = (id) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         let c = new Column_1.default(col.type, col.name, col.tempId);
         columns.push(c);
     }
-    return new Template_1.default(columns, data.name, data.delimiter, data.id);
+    return new Template_1.default(columns, data.name, data.delimiter, data.id, data.date);
 });
-exports.default = { save, query, find, destroy, update };
+exports.default = { save, query, find, destroy, update, all };
 //# sourceMappingURL=TemplateRepo.js.map

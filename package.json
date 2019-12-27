@@ -5,7 +5,7 @@
   "scripts": {
     "serve-ui": "cross-env NODE_ENV=development vue-cli-service serve",
     "build-ui": "cross-env NODE_ENV=development vue-cli-service build",
-    "build-core": "tsc",
+    "build-core": "cross-env NODE_ENV=development tsc",
     "build-dev": "cross-env NODE_ENV=development vue-cli-service build && cross-env NODE_ENV=development tsc",
     "build": "vue-cli-service build && tsc",
     "test:unit": "vue-cli-service test:unit",
@@ -13,7 +13,8 @@
     "dev": "nodemon",
     "test": "mocha --timeout 5000 --require ts-node/register ./test/**/*.js",
     "start": "cross-env NODE_ENV=development vue-cli-service build && tsc && electron main.js",
-    "repair": "electron-rebuild -f -w sqlite3 && electron ."
+    "start-dev": "cross-env NODE_ENV=development electron main.js",
+    "build-sqlite": "electron-rebuild -f -w sqlite3 && electron ."
   },
   "dependencies": {
     "core-js": "^3.6.0",
@@ -22,6 +23,7 @@
     "moment": "^2.24.0",
     "sequelize": "^5.21.2",
     "sqlite3": "^4.1.1",
+    "exceljs": "^3.5.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.0.2",
     "vue-property-decorator": "^8.3.0",
@@ -33,6 +35,8 @@
     "@types/mocha": "^5.2.7",
     "@types/sqlite3": "^3.1.6",
     "@types/validator": "^12.0.1",
+    "@types/exceljs": "^1.3.0",
+    "@types/node": "^12.12.22",
     "@typescript-eslint/eslint-plugin": "^2.12.0",
     "@typescript-eslint/parser": "^2.12.0",
     "@vue/cli-plugin-babel": "^4.1.1",

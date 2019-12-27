@@ -11,13 +11,15 @@
           active-text-color="#ffd04b"
           style="padding-left: 45px"
         >
-          <el-menu-item index="/">文件转换</el-menu-item>
-          <el-menu-item index="/temp">模板管理</el-menu-item>
+          <el-menu-item index="/" :disabled="this.running">文件转换</el-menu-item>
+          <el-menu-item index="/temp" :disabled="this.running">模板管理</el-menu-item>
         </el-menu>
       </el-header>
       <el-main style="padding:0">
         <transition name="el-zoom-in-top" :duration="800">
-          <router-view />
+          <keep-alive>
+            <router-view />
+          </keep-alive>
         </transition>
       </el-main>
     </el-container>
@@ -26,6 +28,8 @@
 
 <script lang="ts">
 import Vue from "vue";
+import messenger from "./router/messenger";
+
 export default Vue.extend({
   data() {
     let defaultIndex: string = "/";
@@ -33,9 +37,11 @@ export default Vue.extend({
       "/": "/",
       "/temp": "/temp"
     };
+    let running: boolean = false;
     return {
       activeIndex: defaultIndex,
-      path: pathMap
+      path: pathMap,
+      running: running
     };
   },
   methods: {
@@ -50,6 +56,15 @@ export default Vue.extend({
   },
   beforeUpdate: function() {
     this.activeIndex = this.$route.path;
+  },
+  created: function() {
+    let app = this;
+    messenger.$on("lock", () => {
+      app.running = true;
+    });
+    messenger.$on("unlock", () => {
+      app.running = false;
+    });
   }
 });
 </script>
