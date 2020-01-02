@@ -1,8 +1,10 @@
 {
   "name": "melody",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "author": "Fukwai",
   "main": "./core/main.js",
+  "license": "MIT",
   "scripts": {
     "serve-ui": "cross-env NODE_ENV=development vue-cli-service serve",
     "build-ui": "cross-env NODE_ENV=development vue-cli-service build",
