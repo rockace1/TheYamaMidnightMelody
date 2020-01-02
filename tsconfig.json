@@ -9,8 +9,9 @@
         "experimentalDecorators": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "sourceMap": true,
+        "sourceMap": false,
         "baseUrl": ".",
+        "outDir": "./dist/core",
         "typeRoots": [
             "node_modules/@types",
             "node_modules/@types/node"
@@ -37,6 +38,7 @@
         "src/core/**/*",
         "tests/core/**/*",
         "main.ts",
+        "Preload.ts"
     ],
     "exclude": [
         "src/ui/**/*",

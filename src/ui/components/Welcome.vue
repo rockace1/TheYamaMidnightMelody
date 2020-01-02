@@ -245,7 +245,6 @@ export default Vue.extend({
     messenger.$on(
       "convertDone",
       (response: { index: number; result: Result<void> }) => {
-        console.log("response:", response);
         let data: Doc = v.tableData[response.index];
         if (data !== undefined) {
           if (response.result.success) {

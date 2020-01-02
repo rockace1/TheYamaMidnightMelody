@@ -1,7 +1,7 @@
 const path = require('path')
 module.exports = {
     publicPath: '.',
-    outputDir: './dist',
+    outputDir: './dist/render',
     productionSourceMap: false,
     devServer: {
         port: 8000,
