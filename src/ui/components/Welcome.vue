@@ -223,15 +223,22 @@ export default Vue.extend({
         messenger.$emit("unlock");
       }
       return finished;
+    },
+    flushTemplate(): void {
+      let result: Result<Array<Template>> = this.$remote.all();
+      if (result.success) {
+        this.templateData = result.data!;
+      } else {
+        this.$error("获取模板信息异常", this);
+      }
     }
   },
   mounted: function() {
-    let result: Result<Array<Template>> = this.$remote.all();
-    if (result.success) {
-      this.templateData = result.data!;
-    } else {
-      this.$error("获取模板信息异常", this);
-    }
+    let v = this;
+    messenger.$on("flushTemplate", () => {
+      v.flushTemplate();
+    });
+    v.flushTemplate();
   },
   created: function() {
     let v = this;

@@ -89,6 +89,7 @@ import Template from "../../core/entity/Template";
 import Page from "../../core/entity/Page";
 // eslint-disable-next-line no-unused-vars
 import Result from "../../core/entity/Result";
+import messenger from '../router/messenger';
 
 export default Vue.extend({
   data() {
@@ -134,6 +135,7 @@ export default Vue.extend({
         this.clearForm();
         this.dialogFormVisible = false;
         this.query(this.current);
+        messenger.$emit('flushTemplate');
       } else {
         this.$error(errMsg, this);
       }
@@ -154,6 +156,7 @@ export default Vue.extend({
       if (result.success) {
         this.query(this.current);
         row.visible = false;
+        messenger.$emit('flushTemplate');
       } else {
         this.$error("删除模板异常", this);
       }

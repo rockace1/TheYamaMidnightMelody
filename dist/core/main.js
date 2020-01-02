@@ -43,7 +43,7 @@ electron_1.app.on('ready', () => tslib_1.__awaiter(void 0, void 0, void 0, funct
 }));
 electron_1.app.on('window-all-closed', () => {
     if (process.platform != 'darwin') {
-        electron_1.app.quit();
+        electron_1.app.exit();
     }
 });
 electron_1.app.on('activate', () => {
