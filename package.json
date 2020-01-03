@@ -3,20 +3,22 @@
   "version": "1.0.0",
   "private": true,
   "author": "Fukwai",
-  "main": "./core/main.js",
+  "main": "./dist/core/main.js",
   "license": "MIT",
+  "description": "application for Kong.",
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
     "serve-ui": "cross-env NODE_ENV=development vue-cli-service serve",
     "build-ui": "cross-env NODE_ENV=development vue-cli-service build",
     "build-core": "cross-env NODE_ENV=development tsc",
-    "build": "vue-cli-service build && tsc && copy package.json dist\\package.json && cd dist && npm i -d",
+    "build": "vue-cli-service build && tsc",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
     "test": "mocha --timeout 5000 --require ts-node/register ./test/**/*.js",
     "start": "cross-env NODE_ENV=development vue-cli-service build && tsc && electron main.js",
     "dev": "cross-env NODE_ENV=development electron dist/core/main.js",
     "rebuild": "electron-rebuild -f -w sqlite3",
-    "pkg": "electron-rebuild -f -w sqlite3 && node build.js"
+    "pkg": "electron-builder --mac"
   },
   "dependencies": {
     "core-js": "^3.6.0",
@@ -52,8 +54,7 @@
     "@vue/eslint-config-typescript": "^5.0.1",
     "@vue/test-utils": "1.0.0-beta.30",
     "electron": "^7.1.7",
-    "electron-rebuild": "^1.8.8",
-    "electron-packager": "^14.1.1",
+    "electron-builder": "^21.2.0",
     "chai": "^4.2.0",
     "cross-env": "^6.0.3",
     "eslint": "^6.7.2",
@@ -64,5 +65,52 @@
     "typescript": "~3.7.3",
     "vue-loader": "^15.8.3",
     "vue-template-compiler": "^2.6.11"
+  },
+  "build": {
+    "productName": "melody",
+    "appId": "cn.rock",
+    "copyright": "Fukwai",
+    "directories": {
+      "output": "release"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false
+    },
+    "files": [
+      "dist/"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "public/favicon.icns"
+    },
+    "win": {
+      "icon": "public/favicon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
+    }
   }
 }
