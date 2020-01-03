@@ -1,4 +1,5 @@
 import { app, BrowserWindow, globalShortcut } from 'electron';
+import path from 'path';
 import database from './src/core/service/Service';
 
 let mainWindow: BrowserWindow | null;
@@ -6,7 +7,7 @@ let mainWindow: BrowserWindow | null;
 const createWindow = () => {
     let width: number = 1024;
     let height: number = 768;
-    let preload: string = `${__dirname}\\preload.js`;
+    let preload: string = path.join(`${__dirname}`, 'preload.js');
     mainWindow = new BrowserWindow({
         minWidth: width, minHeight: height,
         width: width, height: height,
@@ -17,14 +18,14 @@ const createWindow = () => {
     });
     mainWindow.setTitle('Melody');
     if (process.env.NODE_ENV === 'development') {
-        mainWindow.setAutoHideMenuBar(false);
+        mainWindow.autoHideMenuBar = false;
         mainWindow.setMenuBarVisibility(true);
         mainWindow.webContents.openDevTools();
         mainWindow.loadURL('http://localhost:8000');
     } else {
-        mainWindow.setAutoHideMenuBar(true);
+        mainWindow.autoHideMenuBar = true;
         mainWindow.setMenuBarVisibility(false);
-        mainWindow.loadFile(`${__dirname}\\..\\render\\index.html`);
+        mainWindow.loadFile(path.join(`${__dirname}`, '..', 'render', 'index.html'));
     }
 
     mainWindow.on('close', () => {
@@ -36,9 +37,9 @@ const createWindow = () => {
 app.on('ready', async () => {
     createWindow();
     if (process.env.NODE_ENV !== 'development') {
-        globalShortcut.register('CmdOrCtrl+R', () => { });
-        globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
-        globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
+        // globalShortcut.register('CmdOrCtrl+R', () => { });
+        // globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
+        // globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
     }
 });
 

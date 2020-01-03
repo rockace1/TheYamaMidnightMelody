@@ -38,7 +38,7 @@
         "src/core/**/*",
         "tests/core/**/*",
         "main.ts",
-        "Preload.ts"
+        "preload.ts"
     ],
     "exclude": [
         "src/ui/**/*",

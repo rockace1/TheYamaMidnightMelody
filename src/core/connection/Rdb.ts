@@ -1,6 +1,9 @@
 import { Sequelize } from 'sequelize-typescript';
 import ColumnModel from '../model/ColumnModel';
 import TemplateModel from '../model/TemplateModel';
+import path from 'path';
+
+const location = path.join(process.env.HOME!, 'Library', 'Application Support', 'melody', 'melody.db');
 
 const db = new Sequelize({
     database: 'melody_db',
@@ -12,7 +15,7 @@ const db = new Sequelize({
     define: {
         schema: 'melody'
     },
-    storage: './melody.db',
+    storage: location,
 });
 
 const models = [TemplateModel, ColumnModel];

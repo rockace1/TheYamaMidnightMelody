@@ -4,6 +4,8 @@ const tslib_1 = require("tslib");
 const sequelize_typescript_1 = require("sequelize-typescript");
 const ColumnModel_1 = tslib_1.__importDefault(require("../model/ColumnModel"));
 const TemplateModel_1 = tslib_1.__importDefault(require("../model/TemplateModel"));
+const path_1 = tslib_1.__importDefault(require("path"));
+const location = path_1.default.join(process.env.HOME, 'Library', 'Application Support', 'melody', 'melody.db');
 const db = new sequelize_typescript_1.Sequelize({
     database: 'melody_db',
     host: '127.0.0.1',
@@ -14,7 +16,7 @@ const db = new sequelize_typescript_1.Sequelize({
     define: {
         schema: 'melody'
     },
-    storage: './melody.db',
+    storage: location,
 });
 exports.default = db;
 const models = [TemplateModel_1.default, ColumnModel_1.default];
