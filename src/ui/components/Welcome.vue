@@ -1,5 +1,10 @@
 <template>
-  <div class="main-container">
+  <div
+    class="main-container"
+    v-loading="running"
+    element-loading-text="转换中"
+    element-loading-background="rgba(0,0,0,0.5)"
+  >
     <el-row class="file">
       <el-form :inline="true">
         <el-form-item label="文件路径">
@@ -26,7 +31,7 @@
           </template>
         </el-select>
         <el-form-item style="margin-left:10px">
-          <el-button type="primary" @click="add2Queue()" :disabled="running">添加到队列</el-button>
+          <el-button type="primary" @click="add2Queue()" :disabled="running">添加到转换区</el-button>
         </el-form-item>
       </el-form>
     </el-row>
@@ -40,33 +45,24 @@
         <el-table-column prop="tempName" label="适用模板" width="100"></el-table-column>
         <el-table-column label="是否完成" width="100">
           <template slot-scope="scope">
-            <div v-if="running">
-              <i class="el-icon-loading check-loading" />
-            </div>
-            <div v-else>
-              <i v-if="scope.row.finished" class="el-icon-circle-check check-success" />
-              <i v-else class="el-icon-video-pause check-loading" />
-            </div>
+            <i v-if="scope.row.finished" class="el-icon-circle-check check-success" />
+            <i v-else-if="running" class="el-icon-loading check-loading" />
+            <i v-else class="el-icon-video-pause check-loading" />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="100">
           <template slot-scope="scope">
-            <div v-if="running">
-              <i class="el-icon-error" style="cursor: not-allowed;font-size: 18px;" />
-            </div>
-            <div v-else>
-              <i
-                v-if="scope.row.finished"
-                class="el-icon-error"
-                style="cursor: not-allowed;font-size: 18px;"
-              />
-              <i
-                v-else
-                class="el-icon-error"
-                @click="del(scope.$index)"
-                style="color:#ff4a4a;cursor: pointer;font-size: 18px;"
-              />
-            </div>
+            <i
+              v-if="scope.row.finished||running"
+              class="el-icon-error"
+              style="cursor: not-allowed;font-size: 18px;"
+            />
+            <i
+              v-else
+              class="el-icon-error"
+              @click="del(scope.$index)"
+              style="color:#ff4a4a;cursor: pointer;font-size: 18px;"
+            />
           </template>
         </el-table-column>
       </el-table>
