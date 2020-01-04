@@ -1,6 +1,6 @@
 import { app, BrowserWindow, globalShortcut } from 'electron';
 import path from 'path';
-import database from './src/core/service/Service';
+import database from './service/Service';
 
 let mainWindow: BrowserWindow | null;
 
@@ -37,9 +37,9 @@ const createWindow = () => {
 app.on('ready', async () => {
     createWindow();
     if (process.env.NODE_ENV !== 'development') {
-        // globalShortcut.register('CmdOrCtrl+R', () => { });
-        // globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
-        // globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
+        globalShortcut.register('CmdOrCtrl+R', () => { });
+        globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
+        globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
     }
 });
 

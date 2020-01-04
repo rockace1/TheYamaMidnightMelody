@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const electron_1 = require("electron");
 const path_1 = tslib_1.__importDefault(require("path"));
-const Service_1 = tslib_1.__importDefault(require("./src/core/service/Service"));
+const Service_1 = tslib_1.__importDefault(require("./service/Service"));
 let mainWindow;
 const createWindow = () => {
     let width = 1024;
@@ -37,9 +37,9 @@ const createWindow = () => {
 electron_1.app.on('ready', () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     createWindow();
     if (process.env.NODE_ENV !== 'development') {
-        // globalShortcut.register('CmdOrCtrl+R', () => { });
-        // globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
-        // globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
+        electron_1.globalShortcut.register('CmdOrCtrl+R', () => { });
+        electron_1.globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
+        electron_1.globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
     }
 }));
 electron_1.app.on('window-all-closed', () => {

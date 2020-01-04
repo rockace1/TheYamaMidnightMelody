@@ -36,12 +36,12 @@
     },
     "include": [
         "src/core/**/*",
-        "tests/core/**/*",
-        "main.ts",
-        "preload.ts"
+        "src/core/main.ts",
+        "src/core/preload.ts"
     ],
     "exclude": [
         "src/ui/**/*",
+        "tests/core/**/*",
         "tests/ui/**/*",
         "node_modules"
     ]

@@ -12,14 +12,14 @@ describe('Repo', () => {
             let col2: Column = new Column(2, 'col2');
             let col3: Column = new Column(3);
             let template: Template = new Template([col1, col2, col3], 'unit_test', ',');
-            console.log("perpare save:", JSON.stringify(template));
+            console.debug("perpare save:", JSON.stringify(template));
             await repo.save(template);
-            console.log(JSON.stringify(template));
+            console.debug(JSON.stringify(template));
             id = template.getId();
         });
         it('query', async () => {
             let result: Page<Template> = await repo.query(1, 10);
-            console.log(JSON.stringify(result));
+            console.debug(JSON.stringify(result));
         });
         it('update', async () => {
             let col1: Column = new Column(1, 'col11');
@@ -33,7 +33,7 @@ describe('Repo', () => {
                 return;
             }
             let result: Template | null = await repo.find(id);
-            console.log(JSON.stringify(result));
+            console.debug(JSON.stringify(result));
         });
         it('destroy', async () => {
             if (id === undefined) {

@@ -84,7 +84,7 @@ import Vue from "vue";
 import path from "path";
 import moment from "moment";
 // eslint-disable-next-line no-unused-vars
-import { TempFile, Doc } from "../model/Model";
+import { TempFile, Doc } from "../../core/entity/Model";
 // eslint-disable-next-line no-unused-vars
 import Template from "../../core/entity/Template";
 // eslint-disable-next-line no-unused-vars
@@ -162,12 +162,7 @@ export default Vue.extend({
       this.tempFile = { index: null, path: null };
     },
     getFileName(name: string): string {
-      const platform: string = navigator.platform;
-      console.log(platform);
-      let sep = "/";
-      if (platform === "Win32" || platform === "Windows") {
-        sep = "\\";
-      }
+      let sep = this.$remote.getSep();
       let now = moment().format("YYYYMMDDHHmmss");
       let index = name.lastIndexOf(sep);
       let dirName = name.substring(0, index);

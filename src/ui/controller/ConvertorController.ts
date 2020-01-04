@@ -1,4 +1,4 @@
-import { Doc } from '../model/Model';
+import { Doc } from '../../core/entity/Model';
 import Result from '../../core/entity/Result';
 import messenger from '../router/messenger';
 
@@ -10,4 +10,24 @@ window.ipcRenderer.on("convertDone", (event, response: { index: number; result: 
     messenger.$emit('convertDone', response);
 });
 
-export default { convert }
+const isMac = (): boolean => {
+    let result: boolean = window.ipcRenderer.sendSync('isMac');
+    return result;
+}
+
+const isLinux = (): boolean => {
+    let result: boolean = window.ipcRenderer.sendSync('isLinux');
+    return result;
+}
+
+const isWin = (): boolean => {
+    let result: boolean = window.ipcRenderer.sendSync('isWin');
+    return result;
+}
+
+const getSep = (): string => {
+    let result: string = window.ipcRenderer.sendSync('getSep');
+    return result;
+}
+
+export default { convert, isMac, isLinux, isWin, getSep }

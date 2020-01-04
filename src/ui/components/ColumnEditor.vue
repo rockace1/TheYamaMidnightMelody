@@ -23,7 +23,7 @@
 import Vue from "vue";
 // eslint-disable-next-line no-unused-vars
 import Column from "../../core/entity/Column";
-import { ColumnType } from "../model/Constant";
+import { ColumnType } from "../../core/entity/Constant";
 
 export default Vue.extend({
   props: {

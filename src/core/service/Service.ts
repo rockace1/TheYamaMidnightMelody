@@ -2,9 +2,10 @@ import { init } from '../connection/Rdb';
 import Template from '../entity/Template';
 import Page from '../entity/Page';
 import Result from '../entity/Result';
-import { Doc } from '../../ui/model/Model';
+import { Doc } from '../entity/Model';
 import Repo from '../repo/TemplateRepo';
 import Convertor from './Convertor';
+import { Platform } from '../entity/Constant';
 import { ipcMain } from 'electron';
 
 const initDatabase = (): void => {
@@ -90,6 +91,22 @@ ipcMain.on('findTemplate', (event, id: number) => {
     }).catch((err) => {
         event.returnValue = Result.getFail(err.stack);
     })
+});
+
+ipcMain.on('getSep', (event) => {
+    event.returnValue = Platform.sep();
+});
+
+ipcMain.on('isWin', (event) => {
+    event.returnValue = Platform.isWin();
+});
+
+ipcMain.on('isMac', (event) => {
+    event.returnValue = Platform.isMac();
+});
+
+ipcMain.on('isLinux', (event) => {
+    event.returnValue = Platform.isLinux();
 });
 
 export default { initDatabase }

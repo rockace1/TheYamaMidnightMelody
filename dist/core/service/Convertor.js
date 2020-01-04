@@ -24,7 +24,7 @@ const convert = (data, cb) => {
         let dest = path_1.default.normalize(data.dest);
         doConvert(temp, source, dest, cb);
     }).catch((err) => {
-        console.log(err);
+        console.error(err);
     });
 };
 const doConvert = (temp, source, dest, cb) => {
@@ -53,7 +53,7 @@ const doConvert = (temp, source, dest, cb) => {
         });
     }
     catch (err) {
-        console.log('fail!');
+        console.error('fail!');
     }
 };
 const lineParser = (data, delimiter, columns) => {
@@ -67,17 +67,8 @@ const lineParser = (data, delimiter, columns) => {
         else {
             let col = columns[i];
             if (col !== undefined) {
-                switch (col.getType()) {
-                    case 1:
-                        {
-                            value = Number(value);
-                            break;
-                        }
-                        ;
-                    case 2: {
-                        value = '\'' + value;
-                        break;
-                    }
+                if (col.getType() === 1) {
+                    value = Number(value);
                 }
             }
         }
@@ -114,9 +105,19 @@ const createSheet = (wb, name, columns) => {
     let sheet = wb.addWorksheet(name);
     let sheetColumns = [];
     for (let i = 0; i < columns.length; i++) {
-        sheetColumns.push({
-            header: columns[i].getName(),
-        });
+        let col = columns[i];
+        let data = {
+            header: col.getName(),
+            width: 9,
+            style: undefined
+        };
+        if (col.getType() === 1) {
+            data.style = { numFmt: '0.0000_);(0.0000)' };
+        }
+        else if (col.getType() === 2) {
+            data.style = { numFmt: '@' };
+        }
+        sheetColumns.push(data);
     }
     sheet.columns = sheetColumns;
     let row = sheet.getRow(1);

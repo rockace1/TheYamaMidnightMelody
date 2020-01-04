@@ -6,6 +6,7 @@ const Template_1 = tslib_1.__importDefault(require("../entity/Template"));
 const Result_1 = tslib_1.__importDefault(require("../entity/Result"));
 const TemplateRepo_1 = tslib_1.__importDefault(require("../repo/TemplateRepo"));
 const Convertor_1 = tslib_1.__importDefault(require("./Convertor"));
+const Constant_1 = require("../entity/Constant");
 const electron_1 = require("electron");
 const initDatabase = () => {
     Rdb_1.init();
@@ -84,5 +85,17 @@ electron_1.ipcMain.on('findTemplate', (event, id) => {
     }).catch((err) => {
         event.returnValue = Result_1.default.getFail(err.stack);
     });
+});
+electron_1.ipcMain.on('getSep', (event) => {
+    event.returnValue = Constant_1.Platform.sep();
+});
+electron_1.ipcMain.on('isWin', (event) => {
+    event.returnValue = Constant_1.Platform.isWin();
+});
+electron_1.ipcMain.on('isMac', (event) => {
+    event.returnValue = Constant_1.Platform.isMac();
+});
+electron_1.ipcMain.on('isLinux', (event) => {
+    event.returnValue = Constant_1.Platform.isLinux();
 });
 exports.default = { initDatabase };

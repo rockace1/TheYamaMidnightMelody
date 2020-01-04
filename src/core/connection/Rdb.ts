@@ -1,14 +1,16 @@
 import { Sequelize } from 'sequelize-typescript';
 import ColumnModel from '../model/ColumnModel';
 import TemplateModel from '../model/TemplateModel';
+import { Platform } from '../entity/Constant';
 import path from 'path';
 
-const platform: string = process.platform;
 let location = 'melody.db';
-if (platform === 'darwin') {
+if (Platform.isMac()) {
     location = path.join(process.env.HOME!, 'Library', 'Application Support', 'melody', location);
-} else if (platform === 'linux') {
-} else if (platform === 'win32') {
+} else if (Platform.isLinux()) {
+    location = path.join(process.env.HOME!, '.config', location);
+} else if (Platform.isWin()) {
+    location = path.join('./', location);
 }
 
 const db = new Sequelize({

@@ -11,7 +11,7 @@
     "serve-ui": "cross-env NODE_ENV=development vue-cli-service serve",
     "build-ui": "cross-env NODE_ENV=development vue-cli-service build",
     "build-core": "cross-env NODE_ENV=development tsc",
-    "build": "vue-cli-service build && tsc",
+    "build": "cross-env NODE_ENV=production vue-cli-service build && tsc",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
     "test": "mocha --timeout 5000 --require ts-node/register ./test/**/*.js",

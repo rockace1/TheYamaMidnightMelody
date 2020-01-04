@@ -2,7 +2,7 @@ import Excel from 'exceljs';
 import fs from 'fs';
 import path from 'path';
 import lineReader from 'readline';
-import { Doc } from '../../ui/model/Model';
+import { Doc } from '../entity/Model';
 import Repo from '../repo/TemplateRepo';
 import Column from '../entity/Column';
 import Template from '../entity/Template';
@@ -26,7 +26,7 @@ const convert = (data: Doc, cb: Function): void => {
         let dest: string = path.normalize(data.dest);
         doConvert(temp, source, dest, cb);
     }).catch((err) => {
-        console.log(err);
+        console.error(err);
     });
 }
 
@@ -55,7 +55,7 @@ const doConvert = (temp: Template, source: string, dest: string, cb: Function): 
             });
         });
     } catch (err) {
-        console.log('fail!');
+        console.error('fail!');
     }
 }
 
@@ -69,15 +69,8 @@ const lineParser = (data: string, delimiter: string, columns: Array<Column>): Ar
         } else {
             let col = columns[i];
             if (col !== undefined) {
-                switch (col.getType()) {
-                    case 1: {
-                        value = Number(value);
-                        break;
-                    };
-                    case 2: {
-                        value = '\'' + value;
-                        break;
-                    }
+                if (col.getType() === 1) {
+                    value = Number(value);
                 }
             }
         }
@@ -116,9 +109,18 @@ const createSheet = (wb: Excel.Workbook, name: string, columns: Array<Column>): 
     let sheet = wb.addWorksheet(name);
     let sheetColumns = [];
     for (let i = 0; i < columns.length; i++) {
-        sheetColumns.push({
-            header: columns[i].getName(),
-        });
+        let col: Column = columns[i];
+        let data: { header: string | undefined, width: number, style: { numFmt: string } | undefined } = {
+            header: col.getName(),
+            width: 9,
+            style: undefined
+        };
+        if (col.getType() === 1) {
+            data.style = { numFmt: '0.0000_);(0.0000)' };
+        } else if (col.getType() === 2) {
+            data.style = { numFmt: '@' };
+        }
+        sheetColumns.push(data);
     }
     sheet.columns = sheetColumns;
     let row: Excel.Row = sheet.getRow(1);

@@ -4,15 +4,17 @@ const tslib_1 = require("tslib");
 const sequelize_typescript_1 = require("sequelize-typescript");
 const ColumnModel_1 = tslib_1.__importDefault(require("../model/ColumnModel"));
 const TemplateModel_1 = tslib_1.__importDefault(require("../model/TemplateModel"));
+const Constant_1 = require("../entity/Constant");
 const path_1 = tslib_1.__importDefault(require("path"));
-const platform = process.platform;
 let location = 'melody.db';
-if (platform === 'darwin') {
+if (Constant_1.Platform.isMac()) {
     location = path_1.default.join(process.env.HOME, 'Library', 'Application Support', 'melody', location);
 }
-else if (platform === 'linux') {
+else if (Constant_1.Platform.isLinux()) {
+    location = path_1.default.join(process.env.HOME, '.config', location);
 }
-else if (platform === 'win32') {
+else if (Constant_1.Platform.isWin()) {
+    location = path_1.default.join('./', location);
 }
 const db = new sequelize_typescript_1.Sequelize({
     database: 'melody_db',

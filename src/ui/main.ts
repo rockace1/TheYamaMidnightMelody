@@ -19,7 +19,11 @@ Vue.prototype.$remote = {
     find: templateController.find,
     update: templateController.update,
     destroy: templateController.destroy,
-    convert: convertController.convert
+    convert: convertController.convert,
+    isMac: convertController.isMac,
+    isLinux: convertController.isLinux,
+    isWin: convertController.isWin,
+    getSep: convertController.getSep,
 };
 Vue.prototype.$success = (msg: string, v: Vue): void => {
     v.$notify.success({
