@@ -75,7 +75,7 @@ const lineParser = (data: string, delimiter: string, columns: Array<Column>): Ar
                         break;
                     };
                     case 2: {
-                        value = { richText: [{ text: value }] }
+                        value = '\'' + value;
                         break;
                     }
                 }

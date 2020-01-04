@@ -162,8 +162,13 @@ export default Vue.extend({
       this.tempFile = { index: null, path: null };
     },
     getFileName(name: string): string {
+      const platform: string = navigator.platform;
+      console.log(platform);
+      let sep = "/";
+      if (platform === "Win32" || platform === "Windows") {
+        sep = "\\";
+      }
       let now = moment().format("YYYYMMDDHHmmss");
-      let sep = path.sep;
       let index = name.lastIndexOf(sep);
       let dirName = name.substring(0, index);
       let fileName = name.substring(index + 1).replace(path.extname(name), "");

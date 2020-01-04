@@ -14,7 +14,6 @@ else if (platform === 'linux') {
 }
 else if (platform === 'win32') {
 }
-console.log(location);
 const db = new sequelize_typescript_1.Sequelize({
     database: 'melody_db',
     host: '127.0.0.1',
