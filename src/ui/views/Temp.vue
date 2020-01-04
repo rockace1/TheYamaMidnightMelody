@@ -89,11 +89,12 @@ import Template from "../../core/entity/Template";
 import Page from "../../core/entity/Page";
 // eslint-disable-next-line no-unused-vars
 import Result from "../../core/entity/Result";
-import messenger from '../router/messenger';
+import messenger from "../router/messenger";
 
 export default Vue.extend({
   data() {
     let result: {
+      tableHeight: number;
       tableData: Array<Template>;
       form: Template;
       visible: boolean;
@@ -103,6 +104,7 @@ export default Vue.extend({
       current: number;
       updateFlag: boolean;
     } = {
+      tableHeight: document.documentElement.clientHeight - 135,
       tableData: [],
       form: new Template([]),
       visible: false,
@@ -135,7 +137,7 @@ export default Vue.extend({
         this.clearForm();
         this.dialogFormVisible = false;
         this.query(this.current);
-        messenger.$emit('flushTemplate');
+        messenger.$emit("flushTemplate");
       } else {
         this.$error(errMsg, this);
       }
@@ -156,7 +158,7 @@ export default Vue.extend({
       if (result.success) {
         this.query(this.current);
         row.visible = false;
-        messenger.$emit('flushTemplate');
+        messenger.$emit("flushTemplate");
       } else {
         this.$error("删除模板异常", this);
       }
@@ -221,12 +223,17 @@ export default Vue.extend({
     }
   },
   mounted: function() {
-    this.query(this.current);
-  },
-  computed: {
-    tableHeight: function() {
-      return document.documentElement.clientHeight - 135;
-    }
+    let v = this;
+    v.query(v.current);
+    window.addEventListener("resize", () => {
+      setTimeout(() => {
+        let newHeight: number = document.documentElement.clientHeight - 135;
+        if (v.tableHeight === newHeight) {
+          return;
+        }
+        v.tableHeight = newHeight;
+      }, 500);
+    });
   },
   components: { ColumnEditor }
 });

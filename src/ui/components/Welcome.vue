@@ -36,7 +36,12 @@
       </el-form>
     </el-row>
     <el-row class="list">
-      <el-table :data="tableData" style="width: 100%" :row-style="rowStyleName">
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        :max-height="tableHeight"
+        :row-style="rowStyleName"
+      >
         <el-table-column label="序号" width="100">
           <template slot-scope="scope">{{ scope.$index + 1 }}</template>
         </el-table-column>
@@ -96,6 +101,7 @@ import messenger from "../router/messenger";
 export default Vue.extend({
   data() {
     let result: {
+      tableHeight: number;
       tableData: Array<Doc>;
       runningData: Array<{ index: number; data: Doc }>;
       templateData: Array<Template>;
@@ -103,6 +109,7 @@ export default Vue.extend({
       running: boolean;
       runningFile: string;
     } = {
+      tableHeight: document.documentElement.clientHeight - 220,
       tableData: [],
       runningData: [],
       templateData: [],
@@ -236,6 +243,15 @@ export default Vue.extend({
       v.flushTemplate();
     });
     v.flushTemplate();
+    window.addEventListener("resize", () => {
+      setTimeout(() => {
+        let newHeight: number = document.documentElement.clientHeight - 220;
+        if (v.tableHeight === newHeight) {
+          return;
+        }
+        v.tableHeight = newHeight;
+      }, 500);
+    });
   },
   created: function() {
     let v = this;
