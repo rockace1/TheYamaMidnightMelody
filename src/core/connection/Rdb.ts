@@ -3,7 +3,16 @@ import ColumnModel from '../model/ColumnModel';
 import TemplateModel from '../model/TemplateModel';
 import path from 'path';
 
-const location = path.join(process.env.HOME!, 'Library', 'Application Support', 'melody', 'melody.db');
+const platform:string = process.platform;
+let location = 'melody.db';
+if(platform === 'darwin'){
+    location = path.join(process.env.HOME!, 'Library', 'Application Support', 'melody', location);
+}else if(platform === 'linux'){
+
+}else if(platform === 'win32'){
+
+}
+console.log(location);
 
 const db = new Sequelize({
     database: 'melody_db',

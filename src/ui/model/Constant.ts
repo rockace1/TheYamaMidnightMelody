@@ -6,6 +6,9 @@ const ColumnType: Array<{ name: string; value: number }> = [
     {
         name: "数值",
         value: 1
+    }, {
+        name: "文本",
+        value: 2
     }
 ];
 

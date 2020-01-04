@@ -163,11 +163,12 @@ export default Vue.extend({
     },
     getFileName(name: string): string {
       let now = moment().format("YYYYMMDDHHmmss");
-      let index = name.lastIndexOf("\\");
+      let sep = path.sep;
+      let index = name.lastIndexOf(sep);
       let dirName = name.substring(0, index);
       let fileName = name.substring(index + 1).replace(path.extname(name), "");
       let ext = ".xlsx";
-      let result = dirName + "\\" + fileName + "-" + now + ext;
+      let result = dirName + sep + fileName + "-" + now + ext;
       return result;
     },
     rowStyleName({

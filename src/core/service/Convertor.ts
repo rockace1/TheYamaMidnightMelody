@@ -17,7 +17,7 @@ const HEADER_FILL: Excel.FillPattern = {
 };
 const HEADER_BORDER: Excel.Border = { style: 'thin', color: { argb: 'cfcecd' } };
 
-const convert = (data:  Doc , cb: Function): void => {
+const convert = (data: Doc, cb: Function): void => {
     Repo.find(data.tempId).then((temp) => {
         if (temp == null) {
             throw Error('template ' + data.tempId + ' not exist.');
@@ -72,6 +72,10 @@ const lineParser = (data: string, delimiter: string, columns: Array<Column>): Ar
                 switch (col.getType()) {
                     case 1: {
                         value = Number(value);
+                        break;
+                    };
+                    case 2: {
+                        value = { richText: [{ text: value }] }
                         break;
                     }
                 }

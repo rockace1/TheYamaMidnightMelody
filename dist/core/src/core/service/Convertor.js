@@ -68,8 +68,14 @@ const lineParser = (data, delimiter, columns) => {
             let col = columns[i];
             if (col !== undefined) {
                 switch (col.getType()) {
-                    case 1: {
-                        value = Number(value);
+                    case 1:
+                        {
+                            value = Number(value);
+                            break;
+                        }
+                        ;
+                    case 2: {
+                        value = { richText: [{ text: value }] };
                         break;
                     }
                 }
