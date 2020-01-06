@@ -1,0 +1,69 @@
+
+#app {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+.main-container {
+  position: absolute;
+  width: 100%;
+  height: calc(100% - 60px);
+  height: -moz-calc(100% - 60px);
+}
+
+
+.file[data-v-67e83c9b] {
+  position: absolute;
+  padding-top: 20px;
+  width: 100%;
+  background-color: #f4f6f8;
+  height: 80px;
+  top: 0px;
+}
+.list[data-v-67e83c9b] {
+  position: absolute;
+  top: 100px;
+  width: calc(100% - 50px);
+  padding-left: 50px;
+}
+.footer[data-v-67e83c9b] {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #545c64;
+  padding: 0;
+}
+.check-success[data-v-67e83c9b] {
+  color: #2b8630;
+  font-size: 18px;
+}
+.check-loading[data-v-67e83c9b] {
+  font-size: 18px;
+}
+#fileSelector[data-v-67e83c9b] {
+  visibility: hidden;
+  position: absolute;
+}
+
+
+.icon[data-v-3b9a7e7a] {
+  cursor: pointer;
+  font-size: 18px;
+}
+
+
+.list[data-v-33082647] {
+  margin: 0 0 0 20px;
+  width: calc(100% - 20px);
+}
+.footer[data-v-33082647] {
+  position: absolute;
+  margin-top: 10px;
+  width: 100%;
+  height: 60px;
+  padding: 10px 0 0 45px;
+}
+

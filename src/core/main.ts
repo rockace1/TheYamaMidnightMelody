@@ -6,6 +6,9 @@ let mainWindow: BrowserWindow | null;
 
 const createWindow = () => {
     let width: number = 1024;
+    if (process.env.NODE_ENV === 'development') {
+        width = 1595;
+    }
     let height: number = 768;
     let preload: string = path.join(`${__dirname}`, 'preload.js');
     mainWindow = new BrowserWindow({
@@ -57,10 +60,9 @@ app.on('activate', () => {
 
 process.on('uncaughtException', (err) => {
     dialog.showMessageBox({
-        type: 'error',
-        title: '错误',
-        message: '系统异常：' + err.stack,
-        buttons: ['退出']
+        type: 'warning',
+        title: '软件异常，即将退出',
+        message: '未知异常：' + err.stack,
     }).then(() => {
         mainWindow = null;
         app.exit();

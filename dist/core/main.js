@@ -7,6 +7,9 @@ const Service_1 = tslib_1.__importDefault(require("./service/Service"));
 let mainWindow;
 const createWindow = () => {
     let width = 1024;
+    if (process.env.NODE_ENV === 'development') {
+        width = 1595;
+    }
     let height = 768;
     let preload = path_1.default.join(`${__dirname}`, 'preload.js');
     mainWindow = new electron_1.BrowserWindow({
@@ -54,10 +57,9 @@ electron_1.app.on('activate', () => {
 });
 process.on('uncaughtException', (err) => {
     electron_1.dialog.showMessageBox({
-        type: 'error',
-        title: '错误',
-        message: '系统异常：' + err.stack,
-        buttons: ['退出']
+        type: 'warning',
+        title: '软件异常，即将退出',
+        message: '未知异常：' + err.stack,
     }).then(() => {
         mainWindow = null;
         electron_1.app.exit();

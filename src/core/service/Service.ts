@@ -25,6 +25,7 @@ ipcMain.on('convertDoc', (event, data: { index: number, data: Doc }) => {
 });
 
 ipcMain.on('queryTemplate', (event, param: { pageNum: number, size: number }) => {
+    throw Error('errorLo!');
     let pageNum = 1;
     if (param.pageNum > 1) {
         pageNum = param.pageNum;
