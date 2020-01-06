@@ -24,6 +24,7 @@ electron_1.ipcMain.on('convertDoc', (event, data) => {
     }
 });
 electron_1.ipcMain.on('queryTemplate', (event, param) => {
+    throw Error('errororororor!~');
     let pageNum = 1;
     if (param.pageNum > 1) {
         pageNum = param.pageNum;

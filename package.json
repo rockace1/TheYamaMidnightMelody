@@ -8,7 +8,7 @@
   "description": "application for Kong.",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "serve-ui": "cross-env NODE_ENV=development vue-cli-service serve",
+    "server": "cross-env NODE_ENV=development vue-cli-service serve",
     "build-ui": "cross-env NODE_ENV=development vue-cli-service build",
     "build-core": "cross-env NODE_ENV=development tsc",
     "build": "cross-env NODE_ENV=production vue-cli-service build && tsc",
@@ -17,8 +17,7 @@
     "test": "mocha --timeout 5000 --require ts-node/register ./test/**/*.js",
     "start": "cross-env NODE_ENV=development vue-cli-service build && tsc && electron main.js",
     "dev": "cross-env NODE_ENV=development electron dist/core/main.js",
-    "rebuild": "electron-rebuild -f -w sqlite3",
-    "pkg": "electron-builder --mac"
+    "pkg": "electron-builder"
   },
   "dependencies": {
     "core-js": "^3.6.0",

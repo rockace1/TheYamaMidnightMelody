@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut } from 'electron';
+import { app, BrowserWindow, globalShortcut, dialog } from 'electron';
 import path from 'path';
 import database from './service/Service';
 
@@ -53,4 +53,16 @@ app.on('activate', () => {
     if (mainWindow == null) {
         createWindow();
     }
+});
+
+process.on('uncaughtException', (err) => {
+    dialog.showMessageBox({
+        type: 'error',
+        title: '错误',
+        message: '系统异常：' + err.stack,
+        buttons: ['退出']
+    }).then(() => {
+        mainWindow = null;
+        app.exit();
+    });
 });

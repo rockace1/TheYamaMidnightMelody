@@ -52,3 +52,14 @@ electron_1.app.on('activate', () => {
         createWindow();
     }
 });
+process.on('uncaughtException', (err) => {
+    electron_1.dialog.showMessageBox({
+        type: 'error',
+        title: '错误',
+        message: '系统异常：' + err.stack,
+        buttons: ['退出']
+    }).then(() => {
+        mainWindow = null;
+        electron_1.app.exit();
+    });
+});
