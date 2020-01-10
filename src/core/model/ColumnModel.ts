@@ -8,7 +8,7 @@ import TemplateModel from './TemplateModel';
     tableName: 'excel_column',
     indexes: [{ unique: false, name: 'column_index', using: 'BTREE', fields: ['tempId'] }]
 })
-class ColumnModel extends Model<ColumnModel>{
+export default class ColumnModel extends Model<ColumnModel>{
 
     @AllowNull(false)
     @Comment('模板ID')
@@ -27,5 +27,3 @@ class ColumnModel extends Model<ColumnModel>{
     @Column(DataType.INTEGER)
     type!: number;
 }
-
-export default ColumnModel

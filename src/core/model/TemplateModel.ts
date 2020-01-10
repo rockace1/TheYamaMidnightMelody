@@ -4,7 +4,7 @@ import {
 import ColumnModel from './ColumnModel';
 
 @Table({ tableName: 'excel_template' })
-class TemplateModel extends Model<TemplateModel>{
+export default class TemplateModel extends Model<TemplateModel>{
 
     @PrimaryKey
     @AutoIncrement
@@ -31,5 +31,3 @@ class TemplateModel extends Model<TemplateModel>{
     @HasMany(() => ColumnModel)
     columns!: Array<ColumnModel>;
 }
-
-export default TemplateModel

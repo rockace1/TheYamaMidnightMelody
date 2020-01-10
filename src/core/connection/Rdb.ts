@@ -1,19 +1,19 @@
-import { Sequelize } from 'sequelize-typescript';
+import { Sequelize, SequelizeOptions, ModelCtor } from 'sequelize-typescript';
 import ColumnModel from '../model/ColumnModel';
 import TemplateModel from '../model/TemplateModel';
-import { Platform } from '../entity/Constant';
+import platform from '../entity/Platform';
 import path from 'path';
 
-let location = 'melody.db';
-if (Platform.isMac()) {
+let location: string = 'melody.db';
+if (platform.isMac()) {
     location = path.join(process.env.HOME!, 'Library', 'Application Support', 'melody', location);
-} else if (Platform.isLinux()) {
+} else if (platform.isLinux()) {
     location = path.join(process.env.HOME!, '.config', location);
-} else if (Platform.isWin()) {
+} else if (platform.isWin()) {
     location = path.join('./', location);
 }
 
-const db = new Sequelize({
+const options: SequelizeOptions = {
     database: 'melody_db',
     host: '127.0.0.1',
     dialect: 'sqlite',
@@ -24,20 +24,33 @@ const db = new Sequelize({
         schema: 'melody'
     },
     storage: location,
-});
+}
 
 const models = [TemplateModel, ColumnModel];
 
-const init = async () => {
-    try {
-        db.addModels(models);
-        await db.authenticate();
-        await TemplateModel.sync();
-        await ColumnModel.sync();
-        console.debug('Connection has been established successfully.');
-    } catch (err) {
-        console.error('Unable to connect to the database:%s', err);
-    }
-};
+export class Connection extends Sequelize {
+    private array: Array<ModelCtor>;
 
-export { db as default, init };
+    constructor(options: SequelizeOptions, models: Array<ModelCtor>) {
+        super(options);
+        this.array = models;
+    }
+
+    async init(): Promise<void> {
+        try {
+            this.addModels(this.array);
+            await this.authenticate();
+            for (let i = 0; i < this.array.length; i++) {
+                let m: ModelCtor = this.array[i];
+                await m.sync();
+            }
+            console.debug('Connection has been established successfully.');
+        } catch (err) {
+            console.error('Unable to connect to the database:%s', err);
+        }
+    }
+}
+
+const DEFAULT_CONN = new Connection(options, models);
+
+export default DEFAULT_CONN;

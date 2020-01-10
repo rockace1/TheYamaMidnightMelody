@@ -15,21 +15,23 @@ const HEADER_FILL = {
     fgColor: { argb: '252D45' },
 };
 const HEADER_BORDER = { style: 'thin', color: { argb: 'cfcecd' } };
-const convert = (data, cb) => {
-    TemplateRepo_1.default.find(data.tempId).then((temp) => {
-        if (temp == null) {
-            throw Error('template ' + data.tempId + ' not exist.');
-        }
-        let source = path_1.default.normalize(data.source);
-        let dest = path_1.default.normalize(data.dest);
-        doConvert(temp, source, dest, cb);
-    }).catch((err) => {
-        console.error(err);
-    });
+const ConvertorImpl = {
+    convert(data, cb) {
+        TemplateRepo_1.default.find(data.tempId).then((temp) => {
+            if (temp == null) {
+                throw Error('template ' + data.tempId + ' not exist.');
+            }
+            let source = path_1.default.normalize(data.source);
+            let dest = path_1.default.normalize(data.dest);
+            doConvert(temp, source, dest, cb);
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
 };
-const doConvert = (temp, source, dest, cb) => {
+function doConvert(temp, source, dest, cb) {
     try {
-        let columns = temp.getColumns();
+        let columns = temp.columns;
         let reader = readline_1.default.createInterface({
             input: fs_1.default.createReadStream(source, { encoding: 'utf8' })
         });
@@ -39,7 +41,7 @@ const doConvert = (temp, source, dest, cb) => {
         reader.on('line', (line) => {
             sheet = getSheet(index, wb, sheet, columns);
             index++;
-            let cols = lineParser(line, temp.getDelimiter(), columns);
+            let cols = lineParser(line, temp.delimiter, columns);
             let row = sheet.addRow(cols);
             row.commit();
         });
@@ -55,8 +57,8 @@ const doConvert = (temp, source, dest, cb) => {
     catch (err) {
         console.error('fail!');
     }
-};
-const lineParser = (data, delimiter, columns) => {
+}
+function lineParser(data, delimiter, columns) {
     let result = [];
     let array = data.split(delimiter);
     for (let i = 0; i < array.length; i++) {
@@ -67,7 +69,7 @@ const lineParser = (data, delimiter, columns) => {
         else {
             let col = columns[i];
             if (col !== undefined) {
-                if (col.getType() === 1) {
+                if (col.type === 1) {
                     value = Number(value);
                 }
             }
@@ -75,8 +77,8 @@ const lineParser = (data, delimiter, columns) => {
         result.push(value);
     }
     return result;
-};
-const createExcel = (dest) => {
+}
+function createExcel(dest) {
     let now = new Date();
     let author = 'QinJi';
     let workbook = new exceljs_1.default.stream.xlsx.WorkbookWriter({ filename: dest, useStyles: true });
@@ -86,8 +88,8 @@ const createExcel = (dest) => {
     workbook.modified = now;
     workbook.lastPrinted = now;
     return workbook;
-};
-const getSheet = (index, wb, sheet, columns) => {
+}
+function getSheet(index, wb, sheet, columns) {
     let suffix = Math.floor(index / MAX_ROW);
     let sheetName = SHEET_NAME_PREFIX + suffix;
     if (sheet === null) {
@@ -100,21 +102,21 @@ const getSheet = (index, wb, sheet, columns) => {
         }
     }
     return sheet;
-};
-const createSheet = (wb, name, columns) => {
+}
+function createSheet(wb, name, columns) {
     let sheet = wb.addWorksheet(name);
     let sheetColumns = [];
     for (let i = 0; i < columns.length; i++) {
         let col = columns[i];
         let data = {
-            header: col.getName(),
+            header: col.name,
             width: 9,
             style: undefined
         };
-        if (col.getType() === 1) {
+        if (col.type === 1) {
             data.style = { numFmt: '0.0000_);(0.0000)' };
         }
-        else if (col.getType() === 2) {
+        else if (col.type === 2) {
             data.style = { numFmt: '@' };
         }
         sheetColumns.push(data);
@@ -130,5 +132,5 @@ const createSheet = (wb, name, columns) => {
         right: HEADER_BORDER
     };
     return sheet;
-};
-exports.default = { convert };
+}
+exports.default = ConvertorImpl;

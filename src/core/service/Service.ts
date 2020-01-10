@@ -1,112 +1,114 @@
-import { init } from '../connection/Rdb';
+import Connector from '../connection/Rdb';
 import Template from '../entity/Template';
 import Page from '../entity/Page';
 import Result from '../entity/Result';
 import { Doc } from '../entity/Model';
 import Repo from '../repo/TemplateRepo';
 import Convertor from './Convertor';
-import { Platform } from '../entity/Constant';
-import { ipcMain } from 'electron';
 
-const initDatabase = (): void => {
-    init();
+export interface ConvertorCallback {
+    (result: Result<any>, index: number, err: Error | undefined): void
 }
 
-ipcMain.on('convertDoc', (event, data: { index: number, data: Doc }) => {
-    try {
-        Convertor.convert(data.data, () => {
-            let result: Result<void> = Result.getSuccess();
-            event.reply('convertDone', { index: data.index, result: result });
-        });
-    } catch (err) {
-        let result: Result<void> = Result.getFail(err.stack);
-        event.reply('convertDone', { index: data.index, result: result });
-    }
-});
+export interface Service {
+    initDatabase(): void;
+    findTemplate(id: number): Promise<Result<any>>;
+    queryTemplate(param: { pageNum: number, size: number }): Promise<Result<any>>;
+    allTemplate(): Promise<Result<any>>;
+    createTemplate(data: Template): Promise<Result<void>>;
+    destroyTemplate(id: number): Promise<Result<void>>;
+    updateTemplate(data: Template): Promise<Result<void>>;
+    convertDoc(data: { index: number, data: Doc }, callback: ConvertorCallback): void;
+}
 
-ipcMain.on('queryTemplate', (event, param: { pageNum: number, size: number }) => {
-    let pageNum = 1;
-    if (param.pageNum > 1) {
-        pageNum = param.pageNum;
-    }
-    let size = 10;
-    if (param.size > 10) {
-        size = param.size;
-    }
-    Repo.query(pageNum, size).then((data: Page<Template>) => {
-        event.returnValue = Result.getSuccessWith(data);
-    }).catch((err) => {
-        event.returnValue = Result.getFail(err.stack);
-    })
-});
+const ServiceImpl: Service = {
+    initDatabase(): void {
+        Connector.init();
+    },
 
-ipcMain.on('allTemplate', (event) => {
-    Repo.all().then((data: Array<Template>) => {
-        event.returnValue = Result.getSuccessWith(data);
-    }).catch((err) => {
-        event.returnValue = Result.getFail(err.stack);
-    })
-});
-
-ipcMain.on('createTemplate', (event, data: Template) => {
-    data = Template.from(data);
-    Repo.save(data).then(() => {
-        event.returnValue = Result.getSuccess();
-    }).catch((err) => {
-        event.returnValue = Result.getFail(err.stack);
-    })
-});
-
-ipcMain.on('destroyTemplate', (event, id: number) => {
-    Repo.destroy(id).then(() => {
-        event.returnValue = Result.getSuccess();
-    }).catch((err) => {
-        event.returnValue = Result.getFail(err.stack);
-    })
-});
-
-ipcMain.on('updateTemplate', (event, data: Template) => {
-    data = Template.from(data);
-    let id = data.getId();
-    if (id === undefined) {
-        throw Error("template id cannot null.")
-    }
-    Repo.find(id).then((exist) => {
-        if (exist === null) {
-            throw Error("template " + id + " not exist.");
+    async findTemplate(id: number): Promise<Result<any>> {
+        try {
+            let data: Template | null = await Repo.find(id);
+            return Result.getSuccessWith(data);
+        } catch (err) {
+            return Result.getFail(err.stack);
         }
-        Repo.update(data).then(() => {
-            event.returnValue = Result.getSuccess();
-        }).catch((err) => {
-            event.returnValue = Result.getFail(err.stack);
-        })
-    }).catch((err) => {
-        event.returnValue = Result.getFail(err.stack);
-    });
-});
+    },
 
-ipcMain.on('findTemplate', (event, id: number) => {
-    Repo.find(id).then((data) => {
-        event.returnValue = Result.getSuccessWith(data);
-    }).catch((err) => {
-        event.returnValue = Result.getFail(err.stack);
-    })
-});
+    async queryTemplate(param: { pageNum: number, size: number }): Promise<Result<any>> {
+        let pageNum = 1;
+        if (param.pageNum > 1) {
+            pageNum = param.pageNum;
+        }
+        let size = 10;
+        if (param.size > 10) {
+            size = param.size;
+        }
+        try {
+            let data: Page<Template> = await Repo.query(pageNum, size);
+            return Result.getSuccessWith(data);
+        } catch (err) {
+            return Result.getFail(err.stack);
+        }
+    },
 
-ipcMain.on('getSep', (event) => {
-    event.returnValue = Platform.sep();
-});
+    async allTemplate(): Promise<Result<any>> {
+        try {
+            let data: Array<Template> = await Repo.all();
+            return Result.getSuccessWith(data);
+        } catch (err) {
+            return Result.getFail(err.stack);
+        }
+    },
 
-ipcMain.on('isWin', (event) => {
-    event.returnValue = Platform.isWin();
-});
+    async createTemplate(data: Template): Promise<Result<void>> {
+        try {
+            await Repo.save(data);
+            return Result.getSuccess();
+        } catch (err) {
+            console.error(err);
+            return Result.getFail(err.stack);
+        }
+    },
 
-ipcMain.on('isMac', (event) => {
-    event.returnValue = Platform.isMac();
-});
+    async destroyTemplate(id: number): Promise<Result<void>> {
+        try {
+            await Repo.destroy(id);
+            return Result.getSuccess();
+        } catch (err) {
+            return Result.getFail(err.stack);
+        }
+    },
 
-ipcMain.on('isLinux', (event) => {
-    event.returnValue = Platform.isLinux();
-});
+    async updateTemplate(data: Template): Promise<Result<void>> {
+        console.log('update:', data);
+        let id = data.id;
+        if (id === undefined) {
+            return Result.getFail("template id cannot null.");
+        }
+        try {
+            let exist: Template | null = await Repo.find(id);
+            if (exist === null) {
+                return Result.getFail("template " + id + " not exist.");
+            }
+            await Repo.update(data);
+            return Result.getSuccess();
+        } catch (err) {
+            return Result.getFail(err.stack);
+        }
+    },
 
-export default { initDatabase }
+    convertDoc(data: { index: number, data: Doc }, callback: ConvertorCallback): void {
+        try {
+            Convertor.convert(data.data, () => {
+                let result: Result<void> = Result.getSuccess();
+                callback(result, data.index, undefined);
+            });
+        } catch (err) {
+            let result: Result<void> = Result.getFail(err.stack);
+            callback(result, data.index, err);
+        }
+    }
+}
+
+export default ServiceImpl;

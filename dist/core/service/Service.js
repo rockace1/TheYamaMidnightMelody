@@ -1,102 +1,109 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const Rdb_1 = require("../connection/Rdb");
-const Template_1 = tslib_1.__importDefault(require("../entity/Template"));
+const Rdb_1 = tslib_1.__importDefault(require("../connection/Rdb"));
 const Result_1 = tslib_1.__importDefault(require("../entity/Result"));
 const TemplateRepo_1 = tslib_1.__importDefault(require("../repo/TemplateRepo"));
 const Convertor_1 = tslib_1.__importDefault(require("./Convertor"));
-const Constant_1 = require("../entity/Constant");
-const electron_1 = require("electron");
-const initDatabase = () => {
-    Rdb_1.init();
-};
-electron_1.ipcMain.on('convertDoc', (event, data) => {
-    try {
-        Convertor_1.default.convert(data.data, () => {
-            let result = Result_1.default.getSuccess();
-            event.reply('convertDone', { index: data.index, result: result });
+const ServiceImpl = {
+    initDatabase() {
+        Rdb_1.default.init();
+    },
+    findTemplate(id) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                let data = yield TemplateRepo_1.default.find(id);
+                return Result_1.default.getSuccessWith(data);
+            }
+            catch (err) {
+                return Result_1.default.getFail(err.stack);
+            }
         });
-    }
-    catch (err) {
-        let result = Result_1.default.getFail(err.stack);
-        event.reply('convertDone', { index: data.index, result: result });
-    }
-});
-electron_1.ipcMain.on('queryTemplate', (event, param) => {
-    throw Error('errorLo!');
-    let pageNum = 1;
-    if (param.pageNum > 1) {
-        pageNum = param.pageNum;
-    }
-    let size = 10;
-    if (param.size > 10) {
-        size = param.size;
-    }
-    TemplateRepo_1.default.query(pageNum, size).then((data) => {
-        event.returnValue = Result_1.default.getSuccessWith(data);
-    }).catch((err) => {
-        event.returnValue = Result_1.default.getFail(err.stack);
-    });
-});
-electron_1.ipcMain.on('allTemplate', (event) => {
-    TemplateRepo_1.default.all().then((data) => {
-        event.returnValue = Result_1.default.getSuccessWith(data);
-    }).catch((err) => {
-        event.returnValue = Result_1.default.getFail(err.stack);
-    });
-});
-electron_1.ipcMain.on('createTemplate', (event, data) => {
-    data = Template_1.default.from(data);
-    TemplateRepo_1.default.save(data).then(() => {
-        event.returnValue = Result_1.default.getSuccess();
-    }).catch((err) => {
-        event.returnValue = Result_1.default.getFail(err.stack);
-    });
-});
-electron_1.ipcMain.on('destroyTemplate', (event, id) => {
-    TemplateRepo_1.default.destroy(id).then(() => {
-        event.returnValue = Result_1.default.getSuccess();
-    }).catch((err) => {
-        event.returnValue = Result_1.default.getFail(err.stack);
-    });
-});
-electron_1.ipcMain.on('updateTemplate', (event, data) => {
-    data = Template_1.default.from(data);
-    let id = data.getId();
-    if (id === undefined) {
-        throw Error("template id cannot null.");
-    }
-    TemplateRepo_1.default.find(id).then((exist) => {
-        if (exist === null) {
-            throw Error("template " + id + " not exist.");
+    },
+    queryTemplate(param) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            let pageNum = 1;
+            if (param.pageNum > 1) {
+                pageNum = param.pageNum;
+            }
+            let size = 10;
+            if (param.size > 10) {
+                size = param.size;
+            }
+            try {
+                let data = yield TemplateRepo_1.default.query(pageNum, size);
+                return Result_1.default.getSuccessWith(data);
+            }
+            catch (err) {
+                return Result_1.default.getFail(err.stack);
+            }
+        });
+    },
+    allTemplate() {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                let data = yield TemplateRepo_1.default.all();
+                return Result_1.default.getSuccessWith(data);
+            }
+            catch (err) {
+                return Result_1.default.getFail(err.stack);
+            }
+        });
+    },
+    createTemplate(data) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                yield TemplateRepo_1.default.save(data);
+                return Result_1.default.getSuccess();
+            }
+            catch (err) {
+                console.error(err);
+                return Result_1.default.getFail(err.stack);
+            }
+        });
+    },
+    destroyTemplate(id) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                yield TemplateRepo_1.default.destroy(id);
+                return Result_1.default.getSuccess();
+            }
+            catch (err) {
+                return Result_1.default.getFail(err.stack);
+            }
+        });
+    },
+    updateTemplate(data) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log('update:', data);
+            let id = data.id;
+            if (id === undefined) {
+                return Result_1.default.getFail("template id cannot null.");
+            }
+            try {
+                let exist = yield TemplateRepo_1.default.find(id);
+                if (exist === null) {
+                    return Result_1.default.getFail("template " + id + " not exist.");
+                }
+                yield TemplateRepo_1.default.update(data);
+                return Result_1.default.getSuccess();
+            }
+            catch (err) {
+                return Result_1.default.getFail(err.stack);
+            }
+        });
+    },
+    convertDoc(data, callback) {
+        try {
+            Convertor_1.default.convert(data.data, () => {
+                let result = Result_1.default.getSuccess();
+                callback(result, data.index, undefined);
+            });
         }
-        TemplateRepo_1.default.update(data).then(() => {
-            event.returnValue = Result_1.default.getSuccess();
-        }).catch((err) => {
-            event.returnValue = Result_1.default.getFail(err.stack);
-        });
-    }).catch((err) => {
-        event.returnValue = Result_1.default.getFail(err.stack);
-    });
-});
-electron_1.ipcMain.on('findTemplate', (event, id) => {
-    TemplateRepo_1.default.find(id).then((data) => {
-        event.returnValue = Result_1.default.getSuccessWith(data);
-    }).catch((err) => {
-        event.returnValue = Result_1.default.getFail(err.stack);
-    });
-});
-electron_1.ipcMain.on('getSep', (event) => {
-    event.returnValue = Constant_1.Platform.sep();
-});
-electron_1.ipcMain.on('isWin', (event) => {
-    event.returnValue = Constant_1.Platform.isWin();
-});
-electron_1.ipcMain.on('isMac', (event) => {
-    event.returnValue = Constant_1.Platform.isMac();
-});
-electron_1.ipcMain.on('isLinux', (event) => {
-    event.returnValue = Constant_1.Platform.isLinux();
-});
-exports.default = { initDatabase };
+        catch (err) {
+            let result = Result_1.default.getFail(err.stack);
+            callback(result, data.index, err);
+        }
+    }
+};
+exports.default = ServiceImpl;

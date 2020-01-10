@@ -17,22 +17,28 @@ const HEADER_FILL: Excel.FillPattern = {
 };
 const HEADER_BORDER: Excel.Border = { style: 'thin', color: { argb: 'cfcecd' } };
 
-const convert = (data: Doc, cb: Function): void => {
-    Repo.find(data.tempId).then((temp) => {
-        if (temp == null) {
-            throw Error('template ' + data.tempId + ' not exist.');
-        }
-        let source: string = path.normalize(data.source);
-        let dest: string = path.normalize(data.dest);
-        doConvert(temp, source, dest, cb);
-    }).catch((err) => {
-        console.error(err);
-    });
+interface Convertor {
+    convert(data: Doc, cb: Function): void;
 }
 
-const doConvert = (temp: Template, source: string, dest: string, cb: Function): void => {
+const ConvertorImpl: Convertor = {
+    convert(data: Doc, cb: Function): void {
+        Repo.find(data.tempId).then((temp) => {
+            if (temp == null) {
+                throw Error('template ' + data.tempId + ' not exist.');
+            }
+            let source: string = path.normalize(data.source);
+            let dest: string = path.normalize(data.dest);
+            doConvert(temp, source, dest, cb);
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
+}
+
+function doConvert(temp: Template, source: string, dest: string, cb: Function): void {
     try {
-        let columns = temp.getColumns()!;
+        let columns = temp.columns!;
         let reader: lineReader.Interface = lineReader.createInterface({
             input: fs.createReadStream(source, { encoding: 'utf8' })
         });
@@ -42,7 +48,7 @@ const doConvert = (temp: Template, source: string, dest: string, cb: Function): 
         reader.on('line', (line) => {
             sheet = getSheet(index, wb, sheet, columns);
             index++;
-            let cols: Array<any> = lineParser(line, temp.getDelimiter()!, columns);
+            let cols: Array<any> = lineParser(line, temp.delimiter!, columns);
             let row: Excel.Row = sheet.addRow(cols);
             row.commit();
         });
@@ -59,7 +65,7 @@ const doConvert = (temp: Template, source: string, dest: string, cb: Function): 
     }
 }
 
-const lineParser = (data: string, delimiter: string, columns: Array<Column>): Array<any> => {
+function lineParser(data: string, delimiter: string, columns: Array<Column>): Array<any> {
     let result: Array<any> = [];
     let array: Array<string> = data.split(delimiter);
     for (let i = 0; i < array.length; i++) {
@@ -69,7 +75,7 @@ const lineParser = (data: string, delimiter: string, columns: Array<Column>): Ar
         } else {
             let col = columns[i];
             if (col !== undefined) {
-                if (col.getType() === 1) {
+                if (col.type === 1) {
                     value = Number(value);
                 }
             }
@@ -79,7 +85,7 @@ const lineParser = (data: string, delimiter: string, columns: Array<Column>): Ar
     return result;
 }
 
-const createExcel = (dest: string): Excel.stream.xlsx.WorkbookWriter => {
+function createExcel(dest: string): Excel.stream.xlsx.WorkbookWriter {
     let now = new Date();
     let author = 'QinJi';
     let workbook = new Excel.stream.xlsx.WorkbookWriter({ filename: dest, useStyles: true });
@@ -91,7 +97,7 @@ const createExcel = (dest: string): Excel.stream.xlsx.WorkbookWriter => {
     return workbook;
 }
 
-const getSheet = (index: number, wb: Excel.Workbook, sheet: Excel.Worksheet | null, columns: Array<Column>): Excel.Worksheet => {
+function getSheet(index: number, wb: Excel.Workbook, sheet: Excel.Worksheet | null, columns: Array<Column>): Excel.Worksheet {
     let suffix = Math.floor(index / MAX_ROW);
     let sheetName = SHEET_NAME_PREFIX + suffix;
     if (sheet === null) {
@@ -105,19 +111,19 @@ const getSheet = (index: number, wb: Excel.Workbook, sheet: Excel.Worksheet | nu
     return sheet;
 }
 
-const createSheet = (wb: Excel.Workbook, name: string, columns: Array<Column>): Excel.Worksheet => {
+function createSheet(wb: Excel.Workbook, name: string, columns: Array<Column>): Excel.Worksheet {
     let sheet = wb.addWorksheet(name);
     let sheetColumns = [];
     for (let i = 0; i < columns.length; i++) {
         let col: Column = columns[i];
         let data: { header: string | undefined, width: number, style: { numFmt: string } | undefined } = {
-            header: col.getName(),
+            header: col.name,
             width: 9,
             style: undefined
         };
-        if (col.getType() === 1) {
+        if (col.type === 1) {
             data.style = { numFmt: '0.0000_);(0.0000)' };
-        } else if (col.getType() === 2) {
+        } else if (col.type === 2) {
             data.style = { numFmt: '@' };
         }
         sheetColumns.push(data);
@@ -135,4 +141,4 @@ const createSheet = (wb: Excel.Workbook, name: string, columns: Array<Column>): 
     return sheet;
 }
 
-export default { convert }
+export default ConvertorImpl;

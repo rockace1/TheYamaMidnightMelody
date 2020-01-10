@@ -1,33 +1,42 @@
 import { Doc } from '../../core/entity/Model';
-import Result from '../../core/entity/Result';
-import messenger from '../router/messenger';
+import { Platform } from '../../core/entity/Platform';
+import { Service, ConvertorCallback } from '../../core/service/Service';
+const remote = window.require('electron').remote;
+const platform: Platform = remote.require('../core/entity/Platform').default;
+const service: Service = remote.require('../core/service/Service').default;
 
-const convert = (data: Doc, index: number): void => {
-    window.ipcRenderer.send('convertDoc', { index, data });
+export interface ConvertorController {
+    convert(data: Doc, index: number, callback: ConvertorCallback): void;
+    isMac(): boolean;
+    isLinux(): boolean;
+    isWin(): boolean;
+    getSep(): string;
 }
 
-window.ipcRenderer.on("convertDone", (event, response: { index: number; result: Result<void> }) => {
-    messenger.$emit('convertDone', response);
-});
+const ConvertorControllerImpl: ConvertorController = {
+    convert(data: Doc, index: number, callback: ConvertorCallback): void {
+        service.convertDoc({ index, data }, callback);
+    },
 
-const isMac = (): boolean => {
-    let result: boolean = window.ipcRenderer.sendSync('isMac');
-    return result;
+    isMac(): boolean {
+        let result: boolean = platform.isMac();
+        return result;
+    },
+
+    isLinux(): boolean {
+        let result: boolean = platform.isLinux();
+        return result;
+    },
+
+    isWin(): boolean {
+        let result: boolean = platform.isWin();
+        return result;
+    },
+
+    getSep(): string {
+        let result: string = platform.sep();
+        return result;
+    }
 }
 
-const isLinux = (): boolean => {
-    let result: boolean = window.ipcRenderer.sendSync('isLinux');
-    return result;
-}
-
-const isWin = (): boolean => {
-    let result: boolean = window.ipcRenderer.sendSync('isWin');
-    return result;
-}
-
-const getSep = (): string => {
-    let result: string = window.ipcRenderer.sendSync('getSep');
-    return result;
-}
-
-export default { convert, isMac, isLinux, isWin, getSep }
+export default ConvertorControllerImpl;

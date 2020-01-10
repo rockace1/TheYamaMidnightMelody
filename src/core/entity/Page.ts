@@ -10,17 +10,6 @@ export default class Page<T> {
         this.count = data.count;
     }
 
-    static from(data: Page<any>, supplier: Function): Page<any> {
-        let p = new Page({ rows: new Array(), count: 0 });
-        p.count = data.count;
-        p.page = data.page;
-        p.pageSize = data.pageSize;
-        for (let t of data.rows) {
-            p.rows.push(supplier(t));
-        }
-        return p;
-    }
-
     setCurrent(page: number): void {
         if (page < 1) {
             page = 1;

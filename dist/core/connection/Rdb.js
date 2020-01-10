@@ -4,19 +4,19 @@ const tslib_1 = require("tslib");
 const sequelize_typescript_1 = require("sequelize-typescript");
 const ColumnModel_1 = tslib_1.__importDefault(require("../model/ColumnModel"));
 const TemplateModel_1 = tslib_1.__importDefault(require("../model/TemplateModel"));
-const Constant_1 = require("../entity/Constant");
+const Platform_1 = tslib_1.__importDefault(require("../entity/Platform"));
 const path_1 = tslib_1.__importDefault(require("path"));
 let location = 'melody.db';
-if (Constant_1.Platform.isMac()) {
+if (Platform_1.default.isMac()) {
     location = path_1.default.join(process.env.HOME, 'Library', 'Application Support', 'melody', location);
 }
-else if (Constant_1.Platform.isLinux()) {
+else if (Platform_1.default.isLinux()) {
     location = path_1.default.join(process.env.HOME, '.config', location);
 }
-else if (Constant_1.Platform.isWin()) {
+else if (Platform_1.default.isWin()) {
     location = path_1.default.join('./', location);
 }
-const db = new sequelize_typescript_1.Sequelize({
+const options = {
     database: 'melody_db',
     host: '127.0.0.1',
     dialect: 'sqlite',
@@ -27,19 +27,30 @@ const db = new sequelize_typescript_1.Sequelize({
         schema: 'melody'
     },
     storage: location,
-});
-exports.default = db;
+};
 const models = [TemplateModel_1.default, ColumnModel_1.default];
-const init = () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    try {
-        db.addModels(models);
-        yield db.authenticate();
-        yield TemplateModel_1.default.sync();
-        yield ColumnModel_1.default.sync();
-        console.debug('Connection has been established successfully.');
+class Connection extends sequelize_typescript_1.Sequelize {
+    constructor(options, models) {
+        super(options);
+        this.array = models;
     }
-    catch (err) {
-        console.error('Unable to connect to the database:%s', err);
+    init() {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                this.addModels(this.array);
+                yield this.authenticate();
+                for (let i = 0; i < this.array.length; i++) {
+                    let m = this.array[i];
+                    yield m.sync();
+                }
+                console.debug('Connection has been established successfully.');
+            }
+            catch (err) {
+                console.error('Unable to connect to the database:%s', err);
+            }
+        });
     }
-});
-exports.init = init;
+}
+exports.Connection = Connection;
+const DEFAULT_CONN = new Connection(options, models);
+exports.default = DEFAULT_CONN;

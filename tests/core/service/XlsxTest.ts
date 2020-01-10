@@ -11,7 +11,7 @@ describe('Xlsx', () => {
             init();
             let dest = 'C:\\Users\\shiqiang\\Desktop\\excel-mini-dest.xlsx';
             let doc: Doc = { source: path, dest: dest, finished: false, tempId: 25, tempName: '' };
-            service.convert(doc,()=>{
+            service.convert(doc, () => {
                 console.debug('success.');
             });
         });

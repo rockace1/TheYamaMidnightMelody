@@ -8,16 +8,6 @@ class Page {
         this.rows = data.rows;
         this.count = data.count;
     }
-    static from(data, supplier) {
-        let p = new Page({ rows: new Array(), count: 0 });
-        p.count = data.count;
-        p.page = data.page;
-        p.pageSize = data.pageSize;
-        for (let t of data.rows) {
-            p.rows.push(supplier(t));
-        }
-        return p;
-    }
     setCurrent(page) {
         if (page < 1) {
             page = 1;

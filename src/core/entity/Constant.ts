@@ -1,5 +1,9 @@
-import path from 'path';
-const ColumnType: Array<{ name: string; value: number }> = [
+export interface ColumnType {
+    readonly name: string;
+    readonly value: number;
+}
+
+const ColumnTypeImpl: ReadonlyArray<ColumnType> = [
     {
         name: "常规",
         value: 0
@@ -12,32 +16,4 @@ const ColumnType: Array<{ name: string; value: number }> = [
     }
 ];
 
-const sep: string = path.sep;
-const platformString: string = process.platform;
-const isPlatform = (name: string): boolean => {
-    return platformString === name;
-}
-
-const Platform = {
-    sep: (): string => {
-        return sep;
-    },
-
-    name: (): string => {
-        return platformString;
-    },
-
-    isWin: (): boolean => {
-        return isPlatform('win32');
-    },
-
-    isMac: (): boolean => {
-        return isPlatform('darwin');
-    },
-
-    isLinux: (): boolean => {
-        return isPlatform('linux');
-    },
-}
-
-export { ColumnType, Platform }
+export default ColumnTypeImpl;

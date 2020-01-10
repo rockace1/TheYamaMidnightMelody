@@ -7,7 +7,8 @@ const Service_1 = tslib_1.__importDefault(require("./service/Service"));
 let mainWindow;
 const createWindow = () => {
     let width = 1024;
-    if (process.env.NODE_ENV === 'development') {
+    let isDev = process.env.NODE_ENV === 'development';
+    if (isDev) {
         width = 1595;
     }
     let height = 768;
@@ -21,7 +22,7 @@ const createWindow = () => {
         }
     });
     mainWindow.setTitle('Melody');
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
         mainWindow.autoHideMenuBar = false;
         mainWindow.setMenuBarVisibility(true);
         mainWindow.webContents.openDevTools();
@@ -35,10 +36,10 @@ const createWindow = () => {
     mainWindow.on('close', () => {
         mainWindow = null;
     });
-    Service_1.default.initDatabase();
 };
 electron_1.app.on('ready', () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     createWindow();
+    Service_1.default.initDatabase();
     if (process.env.NODE_ENV !== 'development') {
         electron_1.globalShortcut.register('CmdOrCtrl+R', () => { });
         electron_1.globalShortcut.register('CmdOrCtrl+Shift+I', () => { });

@@ -10,17 +10,18 @@ export default class Result<T>{
     }
 
     static getSuccess(): Result<void> {
-        let result = new Result<void>(true)
-        return result;
+        return new Result<void>(true);
+    }
+
+    static getEmpty(): Result<void> {
+        return new Result<void>(false);
     }
 
     static getSuccessWith<T>(data: T): Result<T> {
-        let result = new Result<T>(true, '', data);
-        return result;
+        return new Result<T>(true, undefined, data);
     }
 
     static getFail(msg: string): Result<void> {
-        let result = new Result<void>(false, msg);
-        return result;
+        return new Result<void>(false, msg);
     }
 }

@@ -1,12 +1,13 @@
 import { app, BrowserWindow, globalShortcut, dialog } from 'electron';
 import path from 'path';
-import database from './service/Service';
+import service from './service/Service';
 
 let mainWindow: BrowserWindow | null;
 
 const createWindow = () => {
     let width: number = 1024;
-    if (process.env.NODE_ENV === 'development') {
+    let isDev = process.env.NODE_ENV === 'development';
+    if (isDev) {
         width = 1595;
     }
     let height: number = 768;
@@ -20,7 +21,7 @@ const createWindow = () => {
         }
     });
     mainWindow.setTitle('Melody');
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
         mainWindow.autoHideMenuBar = false;
         mainWindow.setMenuBarVisibility(true);
         mainWindow.webContents.openDevTools();
@@ -34,11 +35,11 @@ const createWindow = () => {
     mainWindow.on('close', () => {
         mainWindow = null;
     });
-    database.initDatabase();
 }
 
 app.on('ready', async () => {
     createWindow();
+    service.initDatabase();
     if (process.env.NODE_ENV !== 'development') {
         globalShortcut.register('CmdOrCtrl+R', () => { });
         globalShortcut.register('CmdOrCtrl+Shift+I', () => { });

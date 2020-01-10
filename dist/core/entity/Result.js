@@ -7,16 +7,16 @@ class Result {
         this.data = data;
     }
     static getSuccess() {
-        let result = new Result(true);
-        return result;
+        return new Result(true);
+    }
+    static getEmpty() {
+        return new Result(false);
     }
     static getSuccessWith(data) {
-        let result = new Result(true, '', data);
-        return result;
+        return new Result(true, undefined, data);
     }
     static getFail(msg) {
-        let result = new Result(false, msg);
-        return result;
+        return new Result(false, msg);
     }
 }
 exports.default = Result;

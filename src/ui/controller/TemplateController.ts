@@ -1,51 +1,52 @@
 import Template from '../../core/entity/Template';
 import Page from '../../core/entity/Page';
 import Result from '../../core/entity/Result';
+import { Service } from '../../core/service/Service';
+const remote = window.require('electron').remote;
+const service: Service = remote.require('../core/service/Service').default;
 
-const query = (page: number, size?: number): Result<Page<Template>> => {
-    if (size === undefined || size === null) {
-        size = 10;
-    }
-    let result: Result<Page<Template>> = window.ipcRenderer.sendSync('queryTemplate', { pageNum: page, size: size });
-    if (result.success) {
-        result.data = Page.from(result.data, Template.from);
-    }
-    return result;
+export interface TemplateController {
+    query(page: number, size?: number): Promise<Result<Page<Template>>>;
+    all(): Promise<Result<Template[]>>;
+    create(data: Template): Promise<Result<void>>;
+    destroy(id: number): Promise<Result<void>>;
+    update(data: Template): Promise<Result<void>>;
+    find(id: number): Promise<Result<Template>>;
 }
 
-const all = (): Result<Array<Template>> => {
-    let result: Result<Array<Template>> = window.ipcRenderer.sendSync('allTemplate');
-    if (result.success) {
-        let array: Array<Template> = [];
-        for (let t of result.data) {
-            array.push(Template.from(t));
+const TemplateControllerImpl: TemplateController = {
+    async query(page: number, size?: number): Promise<Result<Page<Template>>> {
+        if (size === undefined || size === null) {
+            size = 10;
         }
-        result.data = array;
+        let result: Result<Page<Template>> = await service.queryTemplate({ pageNum: page, size: size });
+        return result;
+    },
+
+    async all(): Promise<Result<Template[]>> {
+        let result: Result<Template[]> = await service.allTemplate();
+        return result;
+    },
+
+    async create(data: Template): Promise<Result<void>> {
+        let result: Result<void> = await service.createTemplate(data);
+        return result;
+    },
+
+    async destroy(id: number): Promise<Result<void>> {
+        let result: Result<void> = await service.destroyTemplate(id);
+        return result;
+    },
+
+    async update(data: Template): Promise<Result<void>> {
+        let result: Result<void> = await service.updateTemplate(data);
+        return result;
+    },
+
+    async find(id: number): Promise<Result<Template>> {
+        let result: Result<Template> = await service.findTemplate(id);
+        return result;
     }
-    return result;
 }
 
-const create = (data: Template): Result<void> => {
-    let result: Result<void> = window.ipcRenderer.sendSync('createTemplate', data);
-    return result;
-}
-
-const destroy = (id: number): Result<void> => {
-    let result: Result<void> = window.ipcRenderer.sendSync('destroyTemplate', id);
-    return result;
-}
-
-const update = (data: Template): Result<void> => {
-    let result: Result<void> = window.ipcRenderer.sendSync('updateTemplate', data);
-    return result;
-}
-
-const find = (id: number): Result<Template> => {
-    let result: Result<Template> = window.ipcRenderer.sendSync('findTemplate', id);
-    if (result.success && result.data !== null) {
-        result.data = Template.from(result.data);
-    }
-    return result;
-}
-
-export default { query, create, destroy, update, find, all }
+export default TemplateControllerImpl;
