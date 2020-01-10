@@ -4,7 +4,7 @@ const tslib_1 = require("tslib");
 const sequelize_typescript_1 = require("sequelize-typescript");
 const ColumnModel_1 = tslib_1.__importDefault(require("../model/ColumnModel"));
 const TemplateModel_1 = tslib_1.__importDefault(require("../model/TemplateModel"));
-const Platform_1 = tslib_1.__importDefault(require("../entity/Platform"));
+const Platform_1 = tslib_1.__importDefault(require("../service/Platform"));
 const path_1 = tslib_1.__importDefault(require("path"));
 let location = 'melody.db';
 if (Platform_1.default.isMac()) {

@@ -81,7 +81,6 @@ const ServiceImpl: Service = {
     },
 
     async updateTemplate(data: Template): Promise<Result<void>> {
-        console.log('update:', data);
         let id = data.id;
         if (id === undefined) {
             return Result.getFail("template id cannot null.");

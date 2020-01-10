@@ -1,7 +1,7 @@
 import { Sequelize, SequelizeOptions, ModelCtor } from 'sequelize-typescript';
 import ColumnModel from '../model/ColumnModel';
 import TemplateModel from '../model/TemplateModel';
-import platform from '../entity/Platform';
+import platform from '../service/Platform';
 import path from 'path';
 
 let location: string = 'melody.db';

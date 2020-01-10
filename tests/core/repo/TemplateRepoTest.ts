@@ -8,24 +8,24 @@ describe('Repo', () => {
 
     describe('#check template repo.', () => {
         it('save', async () => {
-            let col1: Column = new Column(1, 'col1');
-            let col2: Column = new Column(2, 'col2');
-            let col3: Column = new Column(3);
-            let template: Template = new Template([col1, col2, col3], 'unit_test', ',');
+            let col1: Column = { type: 1, name: 'col1' };
+            let col2: Column = { type: 2, name: 'col2' };
+            let col3: Column = { type: 3 };
+            let template: Template = { columns: [col1, col2, col3], name: 'unit_test', delimiter: ',' };
             console.debug("perpare save:", JSON.stringify(template));
             await repo.save(template);
             console.debug(JSON.stringify(template));
-            id = template.getId();
+            id = template.id;
         });
         it('query', async () => {
             let result: Page<Template> = await repo.query(1, 10);
             console.debug(JSON.stringify(result));
         });
         it('update', async () => {
-            let col1: Column = new Column(1, 'col11');
-            let col2: Column = new Column(2, 'col21');
-            let col3: Column = new Column(3, 'col31');
-            let template: Template = new Template([col1, col2, col3], 'unit_test2', '.', id);
+            let col1: Column = { type: 1, name: 'col11' };
+            let col2: Column = { type: 2, name: 'col21' };
+            let col3: Column = { type: 3, name: 'col31' };
+            let template: Template = { columns: [col1, col2, col3], name: 'unit_test2', delimiter: '.', id: id };
             await repo.update(template);
         });
         it('find', async () => {

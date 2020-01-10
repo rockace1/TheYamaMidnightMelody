@@ -16,14 +16,7 @@
                     ></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <input
-                        id="fileSelector"
-                        ref="fileSelector"
-                        type="file"
-                        accept="text/plain"
-                        @change="selectFile($event)"
-                    />
-                    <el-button plain @click="toSelectFile()" :disabled="running">选择文件</el-button>
+                    <el-button plain @click="selectFile()" :disabled="running">选择文件</el-button>
                 </el-form-item>
                 <el-select v-model="tempFile.index" placeholder="选择模板" @change="selectTemplate">
                     <template v-for="(template,j) in templateData">
@@ -86,8 +79,6 @@
 
 <script lang="ts">
 import Vue from "vue";
-import path from "path";
-import moment from "moment";
 // eslint-disable-next-line no-unused-vars
 import { TempFile, Doc } from "../../core/entity/Model";
 // eslint-disable-next-line no-unused-vars
@@ -122,18 +113,14 @@ export default Vue.extend({
         return result;
     },
     methods: {
-        toSelectFile(): void {
-            let inputObj: any = this.$refs["fileSelector"];
-            inputObj.value = null;
-            inputObj.click();
-        },
-        selectFile(event: any): void {
-            let inputObj = event.currentTarget;
-            let file: string = inputObj.files[0].path;
-            if (this.tempFile == null) {
-                this.tempFile = { index: null, path: null };
+        selectFile(): void {
+            let file = ConvCtrl.chooseFile();
+            if (file) {
+                if (this.tempFile == null) {
+                    this.tempFile = { index: null, path: null };
+                }
+                this.tempFile.path = file;
             }
-            this.tempFile.path = file;
         },
         selectTemplate(index: number): void {
             if (this.tempFile == null) {
@@ -162,25 +149,13 @@ export default Vue.extend({
             }
             let data: Doc = {
                 source: filePath,
-                dest: this.getFileName(filePath),
+                dest: ConvCtrl.getDestPath(filePath),
                 finished: false,
                 tempId: temp.id!,
                 tempName: temp.name!
             };
             this.tableData.push(data);
             this.tempFile = { index: null, path: null };
-        },
-        getFileName(name: string): string {
-            let sep = ConvCtrl.getSep();
-            let now = moment().format("YYYYMMDDHHmmss");
-            let index = name.lastIndexOf(sep);
-            let dirName = name.substring(0, index);
-            let fileName = name
-                .substring(index + 1)
-                .replace(path.extname(name), "");
-            let ext = ".xlsx";
-            let result = dirName + sep + fileName + "-" + now + ext;
-            return result;
         },
         rowStyleName({
             row
@@ -325,10 +300,6 @@ export default Vue.extend({
 }
 .check-loading {
     font-size: 18px;
-}
-#fileSelector {
-    visibility: hidden;
-    position: absolute;
 }
 </style>
 
