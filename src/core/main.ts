@@ -1,12 +1,13 @@
-import { app, BrowserWindow, globalShortcut, dialog } from 'electron';
 import path from 'path';
+import { app, BrowserWindow, globalShortcut, dialog } from 'electron';
 import service from './service/Service';
+import MelodyException from './common/Exception';
 
+const isDev = process.env.NODE_ENV === 'development';
 let mainWindow: BrowserWindow | null;
 
 const createWindow = () => {
     let width: number = 1024;
-    let isDev = process.env.NODE_ENV === 'development';
     if (isDev) {
         width = 1595;
     }
@@ -20,7 +21,7 @@ const createWindow = () => {
             preload: preload
         }
     });
-    mainWindow.setTitle('Melody');
+    mainWindow.setTitle('The Yama Midnight Melody');
     if (isDev) {
         mainWindow.autoHideMenuBar = false;
         mainWindow.setMenuBarVisibility(true);
@@ -40,7 +41,7 @@ const createWindow = () => {
 app.on('ready', async () => {
     createWindow();
     service.initDatabase();
-    if (process.env.NODE_ENV !== 'development') {
+    if (!isDev) {
         globalShortcut.register('CmdOrCtrl+R', () => { });
         globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
         globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
@@ -48,7 +49,7 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform != 'darwin') {
+    if (process.platform !== 'darwin') {
         app.exit();
     }
 });
@@ -59,13 +60,28 @@ app.on('activate', () => {
     }
 });
 
+function exceptionHandler(err: any) {
+    if (err instanceof MelodyException) {
+        dialog.showMessageBox({
+            type: 'warning',
+            title: err.message,
+            message: '错误原因：' + err.stack,
+        });
+    } else {
+        dialog.showMessageBox({
+            type: 'warning',
+            title: '软件异常，即将退出',
+            message: '未知错误：' + err.stack,
+        }).then(() => {
+            mainWindow = null;
+            app.exit();
+        });
+    }
+}
+
+process.on('unhandledRejection', (err) => {
+    exceptionHandler(err);
+});
 process.on('uncaughtException', (err) => {
-    dialog.showMessageBox({
-        type: 'warning',
-        title: '软件异常，即将退出',
-        message: '未知异常：' + err.stack,
-    }).then(() => {
-        mainWindow = null;
-        app.exit();
-    });
+    exceptionHandler(err);
 });

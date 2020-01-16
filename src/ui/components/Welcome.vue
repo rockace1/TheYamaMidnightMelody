@@ -80,13 +80,11 @@
 <script lang="ts">
 import Vue from "vue";
 // eslint-disable-next-line no-unused-vars
-import { TempFile, Doc } from "../../core/entity/Model";
+import { Template, TempFile, Doc } from "../../core/entity/Model";
 // eslint-disable-next-line no-unused-vars
-import Template from "../../core/entity/Template";
+import Page from "../../core/common/Page";
 // eslint-disable-next-line no-unused-vars
-import Page from "../../core/entity/Page";
-// eslint-disable-next-line no-unused-vars
-import Result from "../../core/entity/Result";
+import Result from "../../core/common/Result";
 import messenger from "../router/messenger";
 import TempCtrl from "../controller/TemplateController";
 import ConvCtrl from "../controller/ConvertorController";
@@ -197,23 +195,17 @@ export default Vue.extend({
         },
         convertOne(index: number, data: Doc): void {
             let v = this;
-            v.runningFile = data.dest;
-            ConvCtrl.convert(data, index, (result, index, err) => {
+            let dest = data.dest;
+            v.runningFile = dest;
+            ConvCtrl.convert(data, index, (index, err) => {
                 if (err) {
-                    messenger.$error("文件转换异常", v);
+                    messenger.$error(`文件[${dest}]转换异常`, v);
                     return;
                 }
                 let data: Doc = v.tableData[index];
                 if (data !== undefined) {
-                    if (result.success) {
-                        data.finished = true;
-                        messenger.$success(
-                            "文件[" + data.dest + "]转换成功",
-                            v
-                        );
-                    } else {
-                        messenger.$error("文件[" + data.dest + "]转换异常", v);
-                    }
+                    data.finished = true;
+                    messenger.$success(`文件[${dest}]转换成功`, v);
                 }
                 if (!v.checkFinish()) {
                     let param = v.runningData.pop();

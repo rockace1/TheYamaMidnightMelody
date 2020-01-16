@@ -21,7 +21,7 @@ export default class Result<T>{
         return new Result<T>(true, undefined, data);
     }
 
-    static getFail(msg: string): Result<void> {
-        return new Result<void>(false, msg);
+    static getFail<T>(msg: string): Result<T> {
+        return new Result<T>(false, msg);
     }
 }

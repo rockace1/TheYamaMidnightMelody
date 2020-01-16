@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 release
+dist
 *.db
 
 # local env files

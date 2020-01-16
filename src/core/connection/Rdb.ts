@@ -1,8 +1,10 @@
-import { Sequelize, SequelizeOptions, ModelCtor } from 'sequelize-typescript';
-import ColumnModel from '../model/ColumnModel';
-import TemplateModel from '../model/TemplateModel';
-import platform from '../service/Platform';
 import path from 'path';
+import { Sequelize, SequelizeOptions, ModelCtor } from 'sequelize-typescript';
+import ColumnTable from '../table/ColumnTable';
+import TemplateTable from '../table/TemplateTable';
+import OptionTable from '../table/OptionTable';
+import platform from '../service/Platform';
+import MelodyException from '../common/Exception';
 
 let location: string = 'melody.db';
 if (platform.isMac()) {
@@ -26,7 +28,7 @@ const options: SequelizeOptions = {
     storage: location,
 }
 
-const models = [TemplateModel, ColumnModel];
+const models = [TemplateTable, ColumnTable, OptionTable];
 
 export class Connection extends Sequelize {
     private array: Array<ModelCtor>;
@@ -44,9 +46,8 @@ export class Connection extends Sequelize {
                 let m: ModelCtor = this.array[i];
                 await m.sync();
             }
-            console.debug('Connection has been established successfully.');
         } catch (err) {
-            console.error('Unable to connect to the database:%s', err);
+            throw new MelodyException(`Unable to connect to the database:${options.database}`, err);
         }
     }
 }

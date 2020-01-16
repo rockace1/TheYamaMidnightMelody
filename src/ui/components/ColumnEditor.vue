@@ -31,10 +31,12 @@
 <script lang="ts">
 import Vue from "vue";
 // eslint-disable-next-line no-unused-vars
-import Column from "../../core/entity/Column";
-// eslint-disable-next-line no-unused-vars
-import { ColumnType } from "../../core/entity/Constant";
-import ColumnTypeData from "../../core/entity/Constant";
+import { Column } from "../../core/entity/Model";
+import {
+    default as ColumnTypeData,
+    // eslint-disable-next-line no-unused-vars
+    ColumnType
+} from "../../core/common/Constant";
 
 export default Vue.extend({
     props: {

@@ -1,11 +1,10 @@
-import rdb from '../connection/Rdb';
-
-import ColumnModel from '../model/ColumnModel';
-import TemplateModel from '../model/TemplateModel';
-import Template from '../entity/Template';
-import Column from '../entity/Column';
-import Page from '../entity/Page';
 import { Sequelize } from 'sequelize-typescript';
+import rdb from '../connection/Rdb';
+import ColumnTable from '../table/ColumnTable';
+import TemplateTable from '../table/TemplateTable';
+import { Template, Column } from '../entity/Model';
+import Page from '../common/Page';
+import MelodyException from '../common/Exception';
 
 export interface TemplateRepo {
     save(data: Template): Promise<void>;
@@ -19,116 +18,116 @@ export interface TemplateRepo {
 const TemplateRepoImpl: TemplateRepo = {
     async save(data: Template): Promise<void> {
         await rdb.transaction(async (t) => {
-            let result: TemplateModel = await TemplateModel.create<TemplateModel>(data, { transaction: t });
+            let result: TemplateTable = await TemplateTable.create<TemplateTable>(data, { transaction: t });
             Object.assign(data, { id: result.id });
             let array: Column[] | undefined = data.columns;
             if (array === undefined) {
-                throw Error("empty column in template.");
+                throw new MelodyException(`empty column in template.`);
             }
             for (let c of array) {
                 c.tempId = result.id;
-                await ColumnModel.create<ColumnModel>(c, { transaction: t });
+                await ColumnTable.create<ColumnTable>(c, { transaction: t });
             }
-        }).then(() => {
-            console.debug("save template success.");
-        }).catch((err: any) => {
-            console.error(err);
-            throw err;
+        }).catch((err: Error) => {
+            throw new MelodyException(`save template error.`, err);
         });
     },
 
     async destroy(id: number): Promise<void> {
         await rdb.transaction(async (t) => {
-            let columnNum: number = await ColumnModel.destroy({
+            await ColumnTable.destroy({
                 where: { tempId: id },
                 transaction: t
             });
-            let num: number = await TemplateModel.destroy({
+            await TemplateTable.destroy({
                 where: { id: id },
                 transaction: t
             });
-        }).then(() => {
-            console.debug("delete template success.");
-        }).catch((err: any) => {
-            console.error(err);
-            throw err;
+        }).catch((err: Error) => {
+            throw new MelodyException(`destroy template[${id}] error.`, err);
         });
     },
 
     async update(data: Template): Promise<void> {
         await rdb.transaction(async (t) => {
-            let id = data.id;
-            if (id === undefined) {
-                throw Error("template id cannot null.")
-            }
-            let columnNum = await ColumnModel.destroy({
+            let id = data.id!;
+            await ColumnTable.destroy({
                 where: { tempId: id },
                 transaction: t
             });
-            let result = await TemplateModel.update(data, {
+            await TemplateTable.update(data, {
                 where: { id: id },
                 transaction: t
             });
             let array: Column[] | undefined = data.columns;
             if (array === undefined) {
-                throw Error("empty column in template.");
+                throw new MelodyException(`empty column in template.`);
             }
             for (let c of array) {
                 c.tempId = id;
-                await ColumnModel.create<ColumnModel>(c, { transaction: t });
+                await ColumnTable.create<ColumnTable>(c, { transaction: t });
             }
-        }).then(() => {
-            console.debug("update template success.");
-        }).catch((err: any) => {
-            console.error(err);
-            throw err;
+        }).catch((err: Error) => {
+            throw new MelodyException(`update template[${data.id}] error.`, err);
         });
     },
 
     async query(pageNum: number, size: number): Promise<Page<Template>> {
-        let result: { rows: TemplateModel[]; count: number } = await TemplateModel.findAndCountAll({
-            order: [
-                ['ID', 'DESC']
-            ],
-            limit: size,
-            offset: (pageNum - 1) * size,
-            subQuery: false
-        });
-        let page = new Page({ rows: trans(result.rows), count: result.count });
-        page.setCurrent(pageNum);
-        page.setSize(size);
-        return page;
+        try {
+            let result: { rows: TemplateTable[]; count: number } = await TemplateTable.findAndCountAll({
+                order: [
+                    ['ID', 'DESC']
+                ],
+                limit: size,
+                offset: (pageNum - 1) * size,
+                subQuery: false
+            });
+            let page = new Page({ rows: trans(result.rows), count: result.count });
+            page.setCurrent(pageNum);
+            page.setSize(size);
+            return page;
+        } catch (err) {
+            throw new MelodyException(`query template error.`, err);
+        }
     },
 
     async all(): Promise<Template[]> {
-        let result: TemplateModel[] = await TemplateModel.findAll({
-            order: [
-                ['ID', 'DESC']
-            ]
-        });
-        return trans(result);
+        try {
+            let result: TemplateTable[] = await TemplateTable.findAll({
+                order: [
+                    ['ID', 'DESC']
+                ]
+            });
+            return trans(result);
+        } catch (err) {
+            throw new MelodyException(`query all template error.`, err);
+        }
     },
 
     async find(id: number): Promise<Template | null> {
-        let data: TemplateModel | null = await TemplateModel.findByPk(id, {
-            include: [{
-                model: ColumnModel,
-                where: { tempId: Sequelize.col('TemplateModel.id') }
-            }],
-        });
-        if (data === null) {
-            return null;
+        try {
+            let data: TemplateTable | null = await TemplateTable.findByPk(id, {
+                include: [{
+                    model: ColumnTable,
+                    where: { tempId: Sequelize.col('TemplateTable.id') }
+                }],
+            });
+            if (data === null) {
+                return null;
+            }
+            let columns: Column[] = [];
+            for (let col of data.columns) {
+                let c = { type: col.type, name: col.name, tempId: col.tempId };
+                columns.push(c);
+            }
+            return { columns: columns, name: data.name, delimiter: data.delimiter, id: data.id, date: data.date };
+        } catch (err) {
+            throw new MelodyException(`find template[${id}] error.`, err);
         }
-        let columns: Column[] = [];
-        for (let col of data.columns) {
-            let c = { type: col.type, name: col.name, tempId: col.tempId };
-            columns.push(c);
-        }
-        return { columns: columns, name: data.name, delimiter: data.delimiter, id: data.id, date: data.date };
     }
 }
 
-function trans(source: TemplateModel[]): Template[] {
+function trans(source: TemplateTable[]): Template[] {
     let array: Template[] = [];
     for (let t of source) {
         let columns: Column[] = [];

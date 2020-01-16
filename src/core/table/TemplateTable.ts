@@ -1,10 +1,10 @@
 import {
     Model, Table, Column, DataType, AutoIncrement, AllowNull, PrimaryKey, Comment, HasMany, CreatedAt
 } from 'sequelize-typescript';
-import ColumnModel from './ColumnModel';
+import ColumnTable from './ColumnTable';
 
 @Table({ tableName: 'excel_template' })
-export default class TemplateModel extends Model<TemplateModel>{
+export default class TemplateTable extends Model<TemplateTable>{
 
     @PrimaryKey
     @AutoIncrement
@@ -28,6 +28,6 @@ export default class TemplateModel extends Model<TemplateModel>{
     @Column(DataType.DATE)
     readonly date!: Date;
 
-    @HasMany(() => ColumnModel)
-    columns!: Array<ColumnModel>;
+    @HasMany(() => ColumnTable)
+    columns!: Array<ColumnTable>;
 }

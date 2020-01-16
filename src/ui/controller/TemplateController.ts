@@ -1,6 +1,6 @@
-import Template from '../../core/entity/Template';
-import Page from '../../core/entity/Page';
-import Result from '../../core/entity/Result';
+import { Template } from '../../core/entity/Model';
+import Page from '../../core/common/Page';
+import Result from '../../core/common/Result';
 import { Service } from '../../core/service/Service';
 const remote = window.require('electron').remote;
 const service: Service = remote.require('../core/service/Service').default;
@@ -19,33 +19,57 @@ const TemplateControllerImpl: TemplateController = {
         if (size === undefined || size === null) {
             size = 10;
         }
-        let result: Result<Page<Template>> = await service.queryTemplate({ pageNum: page, size: size });
-        return result;
+        try {
+            let data: Page<Template> = await service.queryTemplate({ pageNum: page, size: size });
+            return Result.getSuccessWith(data);
+        } catch (err) {
+            return Result.getFail('query template fail.');
+        }
     },
 
     async all(): Promise<Result<Template[]>> {
-        let result: Result<Template[]> = await service.allTemplate();
-        return result;
+        try {
+            let data: Template[] = await service.allTemplate();
+            return Result.getSuccessWith(data);
+        } catch (err) {
+            return Result.getFail('query all template fail.');
+        }
     },
 
     async create(data: Template): Promise<Result<void>> {
-        let result: Result<void> = await service.createTemplate(data);
-        return result;
+        try {
+            await service.createTemplate(data);
+            return Result.getSuccess();
+        } catch (err) {
+            return Result.getFail('create template fail.');
+        }
     },
 
     async destroy(id: number): Promise<Result<void>> {
-        let result: Result<void> = await service.destroyTemplate(id);
-        return result;
+        try {
+            await service.destroyTemplate(id);
+            return Result.getSuccess();
+        } catch (err) {
+            return Result.getFail(`destroy template[${id}] fail.`);
+        }
     },
 
     async update(data: Template): Promise<Result<void>> {
-        let result: Result<void> = await service.updateTemplate(data);
-        return result;
+        try {
+            await service.updateTemplate(data);
+            return Result.getSuccess();
+        } catch (err) {
+            return Result.getFail('update template fail.');
+        }
     },
 
     async find(id: number): Promise<Result<Template>> {
-        let result: Result<Template> = await service.findTemplate(id);
-        return result;
+        try {
+            let data: Template | null = await service.findTemplate(id);
+            return Result.getSuccessWith(data);
+        } catch (err) {
+            return Result.getFail(`find template[${id}] fail.`);
+        }
     }
 }
 

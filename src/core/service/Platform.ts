@@ -8,7 +8,7 @@ export interface Platform {
     isWin(): boolean;
     isMac(): boolean;
     isLinux(): boolean;
-    chooseFile(): string | undefined;
+    chooseFile(name: string, ext: string[], file: boolean, dir: boolean, multi: boolean, hidden: boolean): string[] | undefined;
     getDestPath(source: string): string;
 }
 
@@ -41,14 +41,26 @@ const platform: Platform = {
         return isPlatform('linux');
     },
 
-    chooseFile(): string | undefined {
-        let source: string[] | undefined = dialog.showOpenDialogSync({
-            filters: [{ name: 'TEXT', extensions: ['txt'] }],
-            properties: ['openFile']
-        });
-        if (source && source.length > 0) {
-            return source[0];
+    chooseFile(name: string, ext: string[], file: boolean, dir: boolean, multi: boolean, hidden: boolean, defaultPath?: string): string[] | undefined {
+        let properties: Array<'openFile' | 'openDirectory' | 'multiSelections' | 'showHiddenFiles'> = []
+        if (file) {
+            properties.push('openFile');
         }
+        if (dir) {
+            properties.push('openDirectory');
+        }
+        if (multi) {
+            properties.push('multiSelections');
+        }
+        if (hidden) {
+            properties.push('showHiddenFiles');
+        }
+        let source: string[] | undefined = dialog.showOpenDialogSync({
+            defaultPath: defaultPath,
+            filters: [{ name: name, extensions: ext }],
+            properties: properties
+        });
+        return source;
     },
 
     getDestPath(source: string): string {

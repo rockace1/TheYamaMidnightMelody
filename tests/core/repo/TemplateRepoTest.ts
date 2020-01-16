@@ -1,12 +1,13 @@
-import Column from '../../../src/core/entity/Column';
-import Template from '../../../src/core/entity/Template';
-import Page from '../../../src/core/entity/Page';
+import { Template, Column } from '../../../src/core/entity/Model';
+import Page from '../../../src/core/common/Page';
 import repo from '../../../src/core/repo/TemplateRepo';
+import rdb from '../../../src/core/connection/Rdb';
 
 describe('Repo', () => {
     let id: number | undefined;
 
     describe('#check template repo.', () => {
+        rdb.init();
         it('save', async () => {
             let col1: Column = { type: 1, name: 'col1' };
             let col2: Column = { type: 2, name: 'col2' };

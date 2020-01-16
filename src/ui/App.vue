@@ -13,6 +13,7 @@
                 >
                     <el-menu-item index="/" :disabled="this.running">文件转换</el-menu-item>
                     <el-menu-item index="/temp" :disabled="this.running">模板管理</el-menu-item>
+                    <el-menu-item index="/option" :disabled="this.running">软件设置</el-menu-item>
                 </el-menu>
             </el-header>
             <el-main style="padding:0">
@@ -35,7 +36,8 @@ export default Vue.extend({
         let defaultIndex: string = "/";
         let pathMap: { [index: string]: string } = {
             "/": "/",
-            "/temp": "/temp"
+            "/temp": "/temp",
+            "/option": "/option"
         };
         let running: boolean = false;
         return {

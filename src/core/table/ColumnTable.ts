@@ -2,17 +2,17 @@ import {
     Model, Table, Column, DataType, AllowNull, Comment, IsInt, ForeignKey
 } from 'sequelize-typescript';
 
-import TemplateModel from './TemplateModel';
+import TemplateTable from './TemplateTable';
 
 @Table({
     tableName: 'excel_column',
     indexes: [{ unique: false, name: 'column_index', using: 'BTREE', fields: ['tempId'] }]
 })
-export default class ColumnModel extends Model<ColumnModel>{
+export default class ColumnTable extends Model<ColumnTable>{
 
     @AllowNull(false)
     @Comment('模板ID')
-    @ForeignKey(() => TemplateModel)
+    @ForeignKey(() => TemplateTable)
     @Column(DataType.BIGINT)
     tempId!: number;
 

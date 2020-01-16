@@ -40,7 +40,12 @@ const ConvertorControllerImpl: ConvertorController = {
         return result;
     },
     chooseFile(): string | undefined {
-        return platform.chooseFile();
+        let name = 'Text';
+        let ext = ['txt'];
+        let result = platform.chooseFile(name, ext, true, false, true, false);
+        if (result && result.length > 0) {
+            return result[0];
+        }
     },
     getDestPath(source: string): string {
         return platform.getDestPath(source);

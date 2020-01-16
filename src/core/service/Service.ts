@@ -1,24 +1,26 @@
 import Connector from '../connection/Rdb';
-import Template from '../entity/Template';
-import Page from '../entity/Page';
-import Result from '../entity/Result';
-import { Doc } from '../entity/Model';
-import Repo from '../repo/TemplateRepo';
+import { Template, Doc, Option } from '../entity/Model';
+import Page from '../common/Page';
+import templateRepo from '../repo/TemplateRepo';
+import optionRepo from '../repo/OptionRepo';
 import Convertor from './Convertor';
+import MelodyException from '../common/Exception';
 
 export interface ConvertorCallback {
-    (result: Result<any>, index: number, err: Error | undefined): void
+    (index: number, err: Error | undefined): void
 }
 
 export interface Service {
     initDatabase(): void;
-    findTemplate(id: number): Promise<Result<any>>;
-    queryTemplate(param: { pageNum: number, size: number }): Promise<Result<any>>;
-    allTemplate(): Promise<Result<any>>;
-    createTemplate(data: Template): Promise<Result<void>>;
-    destroyTemplate(id: number): Promise<Result<void>>;
-    updateTemplate(data: Template): Promise<Result<void>>;
+    findTemplate(id: number): Promise<Template | null>;
+    queryTemplate(param: { pageNum: number, size: number }): Promise<Page<Template>>;
+    allTemplate(): Promise<Template[]>;
+    createTemplate(data: Template): Promise<void>;
+    destroyTemplate(id: number): Promise<void>;
+    updateTemplate(data: Template): Promise<void>;
     convertDoc(data: { index: number, data: Doc }, callback: ConvertorCallback): void;
+    saveOption(array: Option[]): Promise<void>;
+    getOption(): Promise<Option[]>;
 }
 
 const ServiceImpl: Service = {
@@ -26,16 +28,11 @@ const ServiceImpl: Service = {
         Connector.init();
     },
 
-    async findTemplate(id: number): Promise<Result<any>> {
-        try {
-            let data: Template | null = await Repo.find(id);
-            return Result.getSuccessWith(data);
-        } catch (err) {
-            return Result.getFail(err.stack);
-        }
+    async findTemplate(id: number): Promise<Template | null> {
+        return await templateRepo.find(id);
     },
 
-    async queryTemplate(param: { pageNum: number, size: number }): Promise<Result<any>> {
+    async queryTemplate(param: { pageNum: number, size: number }): Promise<Page<Template>> {
         let pageNum = 1;
         if (param.pageNum > 1) {
             pageNum = param.pageNum;
@@ -44,69 +41,49 @@ const ServiceImpl: Service = {
         if (param.size > 10) {
             size = param.size;
         }
-        try {
-            let data: Page<Template> = await Repo.query(pageNum, size);
-            return Result.getSuccessWith(data);
-        } catch (err) {
-            return Result.getFail(err.stack);
-        }
+        return await templateRepo.query(pageNum, size);
     },
 
-    async allTemplate(): Promise<Result<any>> {
-        try {
-            let data: Array<Template> = await Repo.all();
-            return Result.getSuccessWith(data);
-        } catch (err) {
-            return Result.getFail(err.stack);
-        }
+    async allTemplate(): Promise<Template[]> {
+        return await templateRepo.all();
     },
 
-    async createTemplate(data: Template): Promise<Result<void>> {
-        try {
-            await Repo.save(data);
-            return Result.getSuccess();
-        } catch (err) {
-            console.error(err);
-            return Result.getFail(err.stack);
-        }
+    async createTemplate(data: Template): Promise<void> {
+        await templateRepo.save(data);
     },
 
-    async destroyTemplate(id: number): Promise<Result<void>> {
-        try {
-            await Repo.destroy(id);
-            return Result.getSuccess();
-        } catch (err) {
-            return Result.getFail(err.stack);
-        }
+    async destroyTemplate(id: number): Promise<void> {
+        await templateRepo.destroy(id);
     },
 
-    async updateTemplate(data: Template): Promise<Result<void>> {
+    async updateTemplate(data: Template): Promise<void> {
         let id = data.id;
         if (id === undefined) {
-            return Result.getFail("template id cannot null.");
+            throw new MelodyException(`template id cannot null.`);
         }
-        try {
-            let exist: Template | null = await Repo.find(id);
-            if (exist === null) {
-                return Result.getFail("template " + id + " not exist.");
-            }
-            await Repo.update(data);
-            return Result.getSuccess();
-        } catch (err) {
-            return Result.getFail(err.stack);
+        let exist: Template | null = await templateRepo.find(id);
+        if (exist === null) {
+            throw new MelodyException(`template ${id} not exist.`);
         }
+        await templateRepo.update(data);
     },
 
     convertDoc(data: { index: number, data: Doc }, callback: ConvertorCallback): void {
         try {
             Convertor.convert(data.data, () => {
-                let result: Result<void> = Result.getSuccess();
-                callback(result, data.index, undefined);
+                callback(data.index, undefined);
             });
         } catch (err) {
-            let result: Result<void> = Result.getFail(err.stack);
-            callback(result, data.index, err);
+            callback(data.index, err);
         }
+    },
+
+    async saveOption(array: Option[]): Promise<void> {
+        optionRepo.save(array);
+    },
+    
+    async getOption(): Promise<Option[]> {
+        return optionRepo.all();
     }
 }
 

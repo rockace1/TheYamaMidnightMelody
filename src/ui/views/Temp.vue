@@ -102,13 +102,11 @@ import Vue from "vue";
 import moment from "moment";
 import ColumnEditor from "../components/ColumnEditor.vue";
 // eslint-disable-next-line no-unused-vars
-import Column from "../../core/entity/Column";
+import { Template, Column } from "../../core/entity/Model";
 // eslint-disable-next-line no-unused-vars
-import Template from "../../core/entity/Template";
+import Page from "../../core/common/Page";
 // eslint-disable-next-line no-unused-vars
-import Page from "../../core/entity/Page";
-// eslint-disable-next-line no-unused-vars
-import Result from "../../core/entity/Result";
+import Result from "../../core/common/Result";
 import messenger from "../router/messenger";
 import TempCtrl from "../controller/TemplateController";
 
@@ -127,7 +125,7 @@ export default Vue.extend({
         } = {
             tableHeight: document.documentElement.clientHeight - 135,
             tableData: [],
-            form: { columns: [] },
+            form: { columns: [], delimiter: "" },
             visible: false,
             dialogFormVisible: false,
             formLabelWidth: "120px",
@@ -234,7 +232,7 @@ export default Vue.extend({
         },
         clearForm(): void {
             let empty: Column[] = [{ type: 0 }];
-            this.form = { columns: empty };
+            this.form = { columns: empty, delimiter: "" };
         },
         templateValidator(checkId: boolean): boolean {
             let data: Template = this.form;
