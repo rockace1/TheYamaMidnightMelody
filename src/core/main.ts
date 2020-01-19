@@ -39,13 +39,14 @@ const createWindow = () => {
 }
 
 app.on('ready', async () => {
-    createWindow();
-    service.initDatabase();
-    if (!isDev) {
-        globalShortcut.register('CmdOrCtrl+R', () => { });
-        globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
-        globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
-    }
+    service.initDatabase().then(() => {
+        createWindow();
+        if (!isDev) {
+            globalShortcut.register('CmdOrCtrl+R', () => { });
+            globalShortcut.register('CmdOrCtrl+Shift+I', () => { });
+            globalShortcut.register('CmdOrCtrl+Shift+R', () => { });
+        }
+    });
 });
 
 app.on('window-all-closed', () => {

@@ -1,3 +1,17 @@
+import { Row, Cell } from 'exceljs';
+import kit from '../common/Kit';
+
 export interface Serializer {
-    parse(num: number, line: string, template: { columns: Array<{ name?: string, type: number }>, delimiter: string }): Array<any>;
+    write(row: Row, type: number, value: any, index: number): void;
 }
+
+const SerializerImpl: Serializer = {
+
+    write(row: Row, type: number, value: any, index: number): void {
+        let cell: Cell = row.getCell(index);
+        cell.style.numFmt = kit.getFmt(type);
+        cell.value = value;
+    }
+}
+
+export default SerializerImpl;

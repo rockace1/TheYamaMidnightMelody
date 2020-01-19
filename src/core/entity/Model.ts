@@ -26,7 +26,7 @@ export interface Template {
 }
 
 export interface Option {
-    id: number;
+    id?: number;
     key: number;
     value?: string;
 }

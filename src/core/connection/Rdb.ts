@@ -38,13 +38,13 @@ export class Connection extends Sequelize {
         this.array = models;
     }
 
-    async init(): Promise<void> {
+    async init(force: boolean = false): Promise<void> {
         try {
             this.addModels(this.array);
             await this.authenticate();
             for (let i = 0; i < this.array.length; i++) {
                 let m: ModelCtor = this.array[i];
-                await m.sync();
+                await m.sync({ force: force });
             }
         } catch (err) {
             throw new MelodyException(`Unable to connect to the database:${options.database}`, err);

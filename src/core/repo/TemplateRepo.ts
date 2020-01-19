@@ -137,4 +137,11 @@ function trans(source: TemplateTable[]): Template[] {
     return array;
 }
 
+function prepareName(sourceName: string): string {
+    if (sourceName.length > 250) {
+        sourceName = sourceName.substring(0, 250);
+    }
+    return sourceName + "_copy";
+}
+
 export default TemplateRepoImpl;

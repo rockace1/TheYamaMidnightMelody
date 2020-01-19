@@ -7,6 +7,7 @@ export interface ColumnType {
 export enum OptionKey {
     BASE_FOLDER = 1,
     EXT = 2,
+    CLEAN = 3,
 }
 
 const ColumnTypeImpl: ReadonlyArray<ColumnType> = [

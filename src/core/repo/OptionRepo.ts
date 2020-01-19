@@ -15,13 +15,13 @@ const OptionRepoImpl: OptionRepo = {
     async save(array: Option[]): Promise<void> {
         await rdb.transaction(async (t) => {
             await OptionTable.destroy({
+                where: {},
                 transaction: t
             });
             for (let data of array) {
                 let result: OptionTable = await OptionTable.create<OptionTable>(data, { transaction: t });
                 Object.assign(data, { id: result.id });
             }
-            this.all();
         }).catch((err: Error) => {
             throw new MelodyException(`save option error.`, err);
         });

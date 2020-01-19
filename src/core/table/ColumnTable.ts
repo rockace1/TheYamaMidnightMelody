@@ -1,5 +1,5 @@
 import {
-    Model, Table, Column, DataType, AllowNull, Comment, IsInt, ForeignKey
+    Model, Table, Column, DataType, AutoIncrement, AllowNull, PrimaryKey, Comment, IsInt, ForeignKey
 } from 'sequelize-typescript';
 
 import TemplateTable from './TemplateTable';
@@ -9,6 +9,13 @@ import TemplateTable from './TemplateTable';
     indexes: [{ unique: false, name: 'column_index', using: 'BTREE', fields: ['tempId'] }]
 })
 export default class ColumnTable extends Model<ColumnTable>{
+
+    @PrimaryKey
+    @AutoIncrement
+    @AllowNull(false)
+    @Comment('ID')
+    @Column(DataType.BIGINT)
+    id!: number;
 
     @AllowNull(false)
     @Comment('模板ID')

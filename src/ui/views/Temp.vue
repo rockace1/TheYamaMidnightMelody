@@ -11,6 +11,7 @@
                 </el-table-column>
                 <el-table-column label="操作" width="180">
                     <template slot-scope="scope">
+                        <el-button type="text" size="small" @click="copy(scope.row.id)">复制</el-button>
                         <el-button type="text" size="small" @click="openUpdateForm(scope.row.id)">编辑</el-button>
                         <el-popover
                             placement="top"
@@ -105,8 +106,6 @@ import ColumnEditor from "../components/ColumnEditor.vue";
 import { Template, Column } from "../../core/entity/Model";
 // eslint-disable-next-line no-unused-vars
 import Page from "../../core/common/Page";
-// eslint-disable-next-line no-unused-vars
-import Result from "../../core/common/Result";
 import messenger from "../router/messenger";
 import TempCtrl from "../controller/TemplateController";
 
@@ -151,26 +150,22 @@ export default Vue.extend({
                 func = TempCtrl.update;
                 errMsg = "更新模板[" + this.form.id + "]异常";
             }
-            func(this.form).then((result: Result<void>) => {
-                if (result.success) {
+            func(this.form)
+                .then(() => {
                     this.clearForm();
                     this.dialogFormVisible = false;
                     this.query(this.current);
-                    messenger.$emit("flushTemplate");
-                } else {
+                })
+                .catch(() => {
                     messenger.$error(errMsg, this);
-                }
-            });
+                });
         },
         openUpdateForm(id: number): void {
             this.clearForm();
             this.dialogFormVisible = true;
             this.updateFlag = true;
-            TempCtrl.find(id).then((result: Result<Template>) => {
-                if (!result.success || this.isEmpty(result.data)) {
-                    messenger.$error("查询模板信息异常", this);
-                } else {
-                    let data: Template = result.data!;
+            TempCtrl.find(id)
+                .then((data: Template) => {
                     let columns: Column[] = [];
                     for (let i = 0; i < data.columns.length; i++) {
                         let c: Column = data.columns[i];
@@ -187,32 +182,42 @@ export default Vue.extend({
                         id: data.id,
                         date: data.date
                     };
-                }
-            });
+                })
+                .catch(() => {
+                    messenger.$error("查询模板信息异常", this);
+                });
+        },
+        copy(id: number): void {
+            TempCtrl.copy(id)
+                .then(() => {
+                    this.query(this.current);
+                })
+                .catch(() => {
+                    messenger.$error("复制模板异常", this);
+                });
         },
         deleteRecord(id: number, row: any): void {
-            TempCtrl.destroy(id).then((result: Result<void>) => {
-                if (result.success) {
+            TempCtrl.destroy(id)
+                .then(() => {
                     this.query(this.current);
                     row.visible = false;
-                    messenger.$emit("flushTemplate");
-                } else {
+                })
+                .catch(() => {
                     messenger.$error("删除模板异常", this);
-                }
-            });
+                });
         },
         query(page: number): void {
-            TempCtrl.query(page).then((result: Result<Page<Template>>) => {
-                if (result.success) {
+            TempCtrl.query(page)
+                .then((data: Page<Template>) => {
                     this.tableData = [];
-                    for (let t of result.data!.getData()) {
+                    for (let t of data.getData()) {
                         this.tableData.push(t);
                     }
-                    this.count = result.data!.getCount();
-                } else {
+                    this.count = data.getCount();
+                })
+                .catch(() => {
                     messenger.$error("查询模板异常", this);
-                }
-            });
+                });
         },
         change(index: number, col: Column): void {
             this.form.columns[index] = col;

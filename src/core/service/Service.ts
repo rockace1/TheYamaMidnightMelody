@@ -1,9 +1,11 @@
 import Connector from '../connection/Rdb';
 import { Template, Doc, Option } from '../entity/Model';
+import { OptionKey } from "../../core/common/Constant";
 import Page from '../common/Page';
 import templateRepo from '../repo/TemplateRepo';
 import optionRepo from '../repo/OptionRepo';
 import Convertor from './Convertor';
+import Kit from '../common/Kit';
 import MelodyException from '../common/Exception';
 
 export interface ConvertorCallback {
@@ -11,21 +13,28 @@ export interface ConvertorCallback {
 }
 
 export interface Service {
-    initDatabase(): void;
+    initDatabase(): Promise<void>;
     findTemplate(id: number): Promise<Template | null>;
     queryTemplate(param: { pageNum: number, size: number }): Promise<Page<Template>>;
     allTemplate(): Promise<Template[]>;
     createTemplate(data: Template): Promise<void>;
+    copyTemplate(id: number): Promise<void>;
     destroyTemplate(id: number): Promise<void>;
     updateTemplate(data: Template): Promise<void>;
     convertDoc(data: { index: number, data: Doc }, callback: ConvertorCallback): void;
     saveOption(array: Option[]): Promise<void>;
-    getOption(): Promise<Option[]>;
+    allOption(): Promise<Option[]>;
+    findOption(key: number): Option | undefined;
 }
 
 const ServiceImpl: Service = {
-    initDatabase(): void {
-        Connector.init();
+    async initDatabase(): Promise<void> {
+        await Connector.init();
+        await optionRepo.all();
+        let option: Option | undefined = optionRepo.find(OptionKey.CLEAN);
+        if (option && option.value === "1") {
+            await Connector.init(true);
+        }
     },
 
     async findTemplate(id: number): Promise<Template | null> {
@@ -50,6 +59,16 @@ const ServiceImpl: Service = {
 
     async createTemplate(data: Template): Promise<void> {
         await templateRepo.save(data);
+    },
+
+    async copyTemplate(id: number): Promise<void> {
+        let source: Template | null = await this.findTemplate(id);
+        if (Kit.isNull(source)) {
+            throw new MelodyException(`template[${id}] not exist.`);
+        }
+        let name = prepareName(source!.name!);
+        let data: Template = { columns: source!.columns, name: name, delimiter: source!.delimiter };
+        await this.createTemplate(data);
     },
 
     async destroyTemplate(id: number): Promise<void> {
@@ -78,13 +97,35 @@ const ServiceImpl: Service = {
         }
     },
 
-    async saveOption(array: Option[]): Promise<void> {
+    async saveOption(data: any): Promise<void> {
+        let array: Option[] = [];
+        if (data[OptionKey.BASE_FOLDER]) {
+            array.push({ key: OptionKey.BASE_FOLDER, value: data[OptionKey.BASE_FOLDER] });
+        }
+        if (data[OptionKey.EXT]) {
+            array.push({ key: OptionKey.EXT, value: data[OptionKey.EXT] });
+        }
+        if (data[OptionKey.CLEAN]) {
+            array.push({ key: OptionKey.CLEAN, value: data[OptionKey.CLEAN] });
+        }
         optionRepo.save(array);
+        this.allOption();
     },
-    
-    async getOption(): Promise<Option[]> {
+
+    async allOption(): Promise<Option[]> {
         return optionRepo.all();
+    },
+
+    findOption(key: number): Option | undefined {
+        return optionRepo.find(key);
+    },
+}
+
+function prepareName(sourceName: string): string {
+    if (sourceName.length > 250) {
+        sourceName = sourceName.substring(0, 250);
     }
+    return sourceName + "_copy";
 }
 
 export default ServiceImpl;

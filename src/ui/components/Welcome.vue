@@ -83,8 +83,6 @@ import Vue from "vue";
 import { Template, TempFile, Doc } from "../../core/entity/Model";
 // eslint-disable-next-line no-unused-vars
 import Page from "../../core/common/Page";
-// eslint-disable-next-line no-unused-vars
-import Result from "../../core/common/Result";
 import messenger from "../router/messenger";
 import TempCtrl from "../controller/TemplateController";
 import ConvCtrl from "../controller/ConvertorController";
@@ -224,13 +222,13 @@ export default Vue.extend({
             return finished;
         },
         flushTemplate(): void {
-            TempCtrl.all().then((result: Result<Array<Template>>) => {
-                if (result.success) {
-                    this.templateData = result.data!;
-                } else {
+            TempCtrl.all()
+                .then((data: Template[]) => {
+                    this.templateData = data;
+                })
+                .catch(() => {
                     messenger.$error("获取模板信息异常", this);
-                }
-            });
+                });
         }
     },
     mounted: function() {

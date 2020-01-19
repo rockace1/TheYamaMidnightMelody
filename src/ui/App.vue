@@ -11,7 +11,7 @@
                     active-text-color="#ffd04b"
                     style="padding-left: 45px"
                 >
-                    <el-menu-item index="/" :disabled="this.running">文件转换</el-menu-item>
+                    <el-menu-item index="/" :disabled="this.running" @click="flushTemp()">文件转换</el-menu-item>
                     <el-menu-item index="/temp" :disabled="this.running">模板管理</el-menu-item>
                     <el-menu-item index="/option" :disabled="this.running">软件设置</el-menu-item>
                 </el-menu>
@@ -54,6 +54,9 @@ export default Vue.extend({
             } else {
                 this.$router.push(dest);
             }
+        },
+        flushTemp(): void {
+            messenger.$emit("flushTemplate");
         }
     },
     beforeUpdate: function() {

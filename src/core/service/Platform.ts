@@ -8,7 +8,7 @@ export interface Platform {
     isWin(): boolean;
     isMac(): boolean;
     isLinux(): boolean;
-    chooseFile(name: string, ext: string[], file: boolean, dir: boolean, multi: boolean, hidden: boolean): string[] | undefined;
+    chooseFile(name: string, ext: string[], file: boolean, dir: boolean, multi: boolean, hidden: boolean, defaultPath?: string): string[] | undefined;
     getDestPath(source: string): string;
 }
 
