@@ -8,8 +8,18 @@ export interface Platform {
     isWin(): boolean;
     isMac(): boolean;
     isLinux(): boolean;
-    chooseFile(name: string, ext: string[], file: boolean, dir: boolean, multi: boolean, hidden: boolean, defaultPath?: string): string[] | undefined;
+    chooseFile(param: ChooseFileParam): string[] | undefined;
     getDestPath(source: string): string;
+}
+
+interface ChooseFileParam {
+    name: string,
+    ext: string[],
+    file?: boolean,
+    dir?: boolean,
+    multi?: boolean,
+    hidden?: boolean,
+    defaultPath?: string
 }
 
 const sep: string = path.sep;
@@ -41,23 +51,23 @@ const platform: Platform = {
         return isPlatform('linux');
     },
 
-    chooseFile(name: string, ext: string[], file: boolean, dir: boolean, multi: boolean, hidden: boolean, defaultPath?: string): string[] | undefined {
+    chooseFile(param: ChooseFileParam): string[] | undefined {
         let properties: Array<'openFile' | 'openDirectory' | 'multiSelections' | 'showHiddenFiles'> = []
-        if (file) {
+        if (param.file !== false) {
             properties.push('openFile');
         }
-        if (dir) {
+        if (param.dir) {
             properties.push('openDirectory');
         }
-        if (multi) {
+        if (param.multi) {
             properties.push('multiSelections');
         }
-        if (hidden) {
+        if (param.hidden) {
             properties.push('showHiddenFiles');
         }
         let source: string[] | undefined = dialog.showOpenDialogSync({
-            defaultPath: defaultPath,
-            filters: [{ name: name, extensions: ext }],
+            defaultPath: param.defaultPath,
+            filters: [{ name: param.name, extensions: param.ext }],
             properties: properties
         });
         return source;

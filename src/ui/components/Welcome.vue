@@ -6,27 +6,16 @@
         element-loading-background="rgba(0,0,0,0.5)"
     >
         <el-row class="file">
-            <el-form :inline="true">
-                <el-form-item label="文件路径">
-                    <el-input
-                        placeholder="请选择要转换的文件"
-                        :value="tempFile==null?'':tempFile.path"
-                        style="min-width:350px"
-                        disabled
-                    ></el-input>
-                </el-form-item>
-                <el-form-item>
-                    <el-button plain @click="selectFile()" :disabled="running">选择文件</el-button>
-                </el-form-item>
-                <el-select v-model="tempFile.index" placeholder="选择模板" @change="selectTemplate">
-                    <template v-for="(template,j) in templateData">
-                        <el-option :key="j" :label="template.name" :value="j"></el-option>
-                    </template>
-                </el-select>
-                <el-form-item style="margin-left:10px">
-                    <el-button type="primary" @click="add2Queue()" :disabled="running">添加到转换区</el-button>
-                </el-form-item>
-            </el-form>
+            <el-col :span="4" style="margin-left:15px">
+                <el-button plain @click="selectFile()" :disabled="running">选择文件</el-button>
+            </el-col>
+            <el-col :span="16" style="margin-top:10px;color:#aaaaaa;" align="left">
+                <span v-if="runningFile">正在转换：</span>
+                <span>{{ runningFile }}</span>
+            </el-col>
+            <el-col :span="2">
+                <el-button type="success" @click="run()" :disabled="running">开始</el-button>
+            </el-col>
         </el-row>
         <el-row class="list">
             <el-table
@@ -40,7 +29,25 @@
                 </el-table-column>
                 <el-table-column prop="source" label="源文件名"></el-table-column>
                 <el-table-column prop="dest" label="目标文件名"></el-table-column>
-                <el-table-column prop="tempName" label="适用模板" width="100"></el-table-column>
+                <el-table-column label="适用模板" width="180">
+                    <template slot-scope="scope">
+                        <el-select
+                            v-model="scope.row.tempIndex"
+                            v-if="scope.row.finished||running"
+                            disabled
+                        ></el-select>
+                        <el-select
+                            v-model="scope.row.tempIndex"
+                            v-else
+                            placeholder="选择模板"
+                            @change="selectTemplate(scope.row.tempIndex,scope.$index)"
+                        >
+                            <template v-for="(template,j) in templateData">
+                                <el-option :key="j" :label="template.name" :value="j"></el-option>
+                            </template>
+                        </el-select>
+                    </template>
+                </el-table-column>
                 <el-table-column label="是否完成" width="100">
                     <template slot-scope="scope">
                         <i v-if="scope.row.finished" class="el-icon-circle-check check-success" />
@@ -65,24 +72,16 @@
                 </el-table-column>
             </el-table>
         </el-row>
-        <el-row class="footer">
-            <el-col :span="20" align="left" style="margin:20px 0 0 45px;color:#aaaaaa">
-                <span v-if="runningFile">正在转换：</span>
-                <span>{{ runningFile }}</span>
-            </el-col>
-            <el-col :span="2" style="margin-top:12px">
-                <el-button type="success" @click="run()" :disabled="running">开始</el-button>
-            </el-col>
-        </el-row>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 // eslint-disable-next-line no-unused-vars
-import { Template, TempFile, Doc } from "../../core/entity/Model";
+import { Template, Doc } from "../../core/entity/Model";
 // eslint-disable-next-line no-unused-vars
 import Page from "../../core/common/Page";
+import Kit from "../../core/common/Kit";
 import messenger from "../router/messenger";
 import TempCtrl from "../controller/TemplateController";
 import ConvCtrl from "../controller/ConvertorController";
@@ -94,15 +93,13 @@ export default Vue.extend({
             tableData: Doc[];
             runningData: Array<{ index: number; data: Doc }>;
             templateData: Template[];
-            tempFile: TempFile;
             running: boolean;
             runningFile: string;
         } = {
-            tableHeight: document.documentElement.clientHeight - 220,
+            tableHeight: document.documentElement.clientHeight - 160,
             tableData: [],
             runningData: [],
             templateData: [],
-            tempFile: { index: null, path: null },
             running: false,
             runningFile: ""
         };
@@ -110,48 +107,26 @@ export default Vue.extend({
     },
     methods: {
         selectFile(): void {
-            let file = ConvCtrl.chooseFile();
-            if (file) {
-                if (this.tempFile == null) {
-                    this.tempFile = { index: null, path: null };
+            let files = ConvCtrl.chooseFile();
+            if (files) {
+                for (let file of files) {
+                    this.add2Queue(file);
                 }
-                this.tempFile.path = file;
             }
         },
-        selectTemplate(index: number): void {
-            if (this.tempFile == null) {
-                this.tempFile = { index: null, path: null };
-            }
-            this.tempFile.index = index;
+        selectTemplate(tempIndex: number, index: number): void {
+            let temp: Template = this.templateData[tempIndex];
+            this.tableData[index].tempId = temp.id;
+            this.tableData[index].tempName = temp.name;
+            this.tableData[index].tempIndex = tempIndex;
         },
-        add2Queue(): void {
-            if (this.tempFile.path === null) {
-                messenger.$warning("请选择文件", this);
-                return;
-            }
-            if (this.tempFile.index === null) {
-                messenger.$warning("请选择模板", this);
-                return;
-            }
-            let filePath: string = this.tempFile.path;
-            let temp: Template = this.templateData[this.tempFile.index];
-            if (
-                temp === null ||
-                temp.id === undefined ||
-                temp.name === undefined
-            ) {
-                messenger.$error("模板数据异常", this);
-                return;
-            }
+        add2Queue(filePath: string): void {
             let data: Doc = {
                 source: filePath,
                 dest: ConvCtrl.getDestPath(filePath),
-                finished: false,
-                tempId: temp.id!,
-                tempName: temp.name!
+                finished: false
             };
             this.tableData.push(data);
-            this.tempFile = { index: null, path: null };
         },
         rowStyleName({
             row
@@ -181,15 +156,23 @@ export default Vue.extend({
                 if (data.finished) {
                     continue;
                 }
+                if (Kit.isNull(data.tempId)) {
+                    this.runningData = [];
+                    messenger.$warning(
+                        `请为序号${i + 1}的记录选择模板。`,
+                        this
+                    );
+                    return;
+                }
                 this.runningData.push({ index: i, data: data });
             }
             if (this.runningData.length < 1) {
                 messenger.$warning("请向转换区添加文件", this);
                 return;
             }
-            let param = this.runningData.pop()!;
-            this.convertOne(param.index, param.data);
+            let param = this.runningData.shift()!;
             messenger.$emit("lock");
+            this.convertOne(param.index, param.data);
         },
         convertOne(index: number, data: Doc): void {
             let v = this;
@@ -201,15 +184,13 @@ export default Vue.extend({
                     return;
                 }
                 let data: Doc = v.tableData[index];
-                if (data !== undefined) {
+                if (Kit.isNotNull(data)) {
                     data.finished = true;
                     messenger.$success(`文件[${dest}]转换成功`, v);
                 }
                 if (!v.checkFinish()) {
-                    let param = v.runningData.pop();
-                    if (param !== undefined) {
-                        v.convertOne(param.index, param.data);
-                    }
+                    let param = v.runningData.shift()!;
+                    v.convertOne(param.index, param.data);
                 }
             });
         },
@@ -240,7 +221,7 @@ export default Vue.extend({
         window.addEventListener("resize", () => {
             setTimeout(() => {
                 let newHeight: number =
-                    document.documentElement.clientHeight - 220;
+                    document.documentElement.clientHeight - 160;
                 if (v.tableHeight === newHeight) {
                     return;
                 }
@@ -275,14 +256,6 @@ export default Vue.extend({
     top: 100px;
     width: calc(100% - 50px);
     padding-left: 50px;
-}
-.footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    background-color: #545c64;
-    padding: 0;
 }
 .check-success {
     color: #2b8630;

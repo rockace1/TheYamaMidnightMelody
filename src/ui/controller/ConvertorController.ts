@@ -13,7 +13,7 @@ export interface ConvertorController {
     isLinux(): boolean;
     isWin(): boolean;
     getSep(): string;
-    chooseFile(): string | undefined;
+    chooseFile(): string[] | undefined;
     getDestPath(source: string): string;
 }
 
@@ -41,16 +41,13 @@ const ConvertorControllerImpl: ConvertorController = {
         let result: string = platform.sep();
         return result;
     },
-    chooseFile(): string | undefined {
+    chooseFile(): string[] | undefined {
         let name = 'Text';
         let extOption = service.findOption(OptionKey.EXT);
         let ext = parseExtStr(extOption);
         let pathOption = service.findOption(OptionKey.BASE_FOLDER);
         let defaultPath = Kit.isNull(pathOption) ? undefined : pathOption.value;
-        let result = platform.chooseFile(name, ext, true, false, true, false, defaultPath);
-        if (result && result.length > 0) {
-            return result[0];
-        }
+        return platform.chooseFile({ name: name, ext: ext, multi: true, defaultPath: defaultPath });
     },
     getDestPath(source: string): string {
         return platform.getDestPath(source);

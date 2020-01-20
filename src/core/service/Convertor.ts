@@ -25,7 +25,7 @@ interface Convertor {
 
 const ConvertorImpl: Convertor = {
     convert(data: Doc, callback: Function): void {
-        Repo.find(data.tempId).then((template) => {
+        Repo.find(data.tempId!).then((template) => {
             if (kit.isNull(template)) {
                 throw new MelodyException(`template ${data.tempId} not exist.`);
             }

@@ -1,14 +1,10 @@
-export interface TempFile {
-    index: number | null;
-    path: string | null;
-}
-
 export interface Doc {
     source: string;
     dest: string;
     finished: boolean;
-    tempId: number;
-    tempName: string;
+    tempId?: number;
+    tempName?: string;
+    tempIndex?:number;
 }
 
 export interface Column {

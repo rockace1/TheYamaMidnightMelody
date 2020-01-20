@@ -32,7 +32,9 @@ const OptionControllerImpl: OptionController = {
     chooseFile(): string | undefined {
         let name = 'Folder';
         let ext = [];
-        let result = platform.chooseFile(name, ext, false, true, false, false);
+        let result = platform.chooseFile({
+            name: name, ext: ext, file: false, dir: true
+        });
         if (result && result.length > 0) {
             return result[0];
         }
