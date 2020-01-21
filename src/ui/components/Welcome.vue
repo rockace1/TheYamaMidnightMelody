@@ -10,8 +10,7 @@
                 <el-button plain @click="selectFile()" :disabled="running">选择文件</el-button>
             </el-col>
             <el-col :span="16" style="margin-top:10px;color:#aaaaaa;" align="left">
-                <span v-if="runningFile">正在转换：</span>
-                <span>{{ runningFile }}</span>
+                <div class="running" v-if="runningFile">正在转换：{{ runningFile }}</div>
             </el-col>
             <el-col :span="2">
                 <el-button type="success" @click="run()" :disabled="running">开始</el-button>
@@ -267,6 +266,13 @@ export default Vue.extend({
 }
 .check-loading {
     font-size: 18px;
+}
+.running {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: keep-all;
 }
 </style>
 
