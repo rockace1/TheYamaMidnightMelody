@@ -27,15 +27,19 @@
                 <el-table-column label="序号" width="100">
                     <template slot-scope="scope">{{ scope.$index + 1 }}</template>
                 </el-table-column>
-                <el-table-column prop="source" label="源文件名"></el-table-column>
-                <el-table-column prop="dest" label="目标文件名"></el-table-column>
+                <el-table-column prop="source" label="源文件名" :show-overflow-tooltip="true"></el-table-column>
+                <el-table-column prop="dest" label="目标文件名" :show-overflow-tooltip="true"></el-table-column>
                 <el-table-column label="适用模板" width="180">
                     <template slot-scope="scope">
                         <el-select
                             v-model="scope.row.tempIndex"
                             v-if="scope.row.finished||running"
                             disabled
-                        ></el-select>
+                        >
+                            <template v-for="(template,j) in templateData">
+                                <el-option :key="j" :label="template.name" :value="j"></el-option>
+                            </template>
+                        </el-select>
                         <el-select
                             v-model="scope.row.tempIndex"
                             v-else
@@ -126,7 +130,7 @@ export default Vue.extend({
                 dest: ConvCtrl.getDestPath(filePath),
                 finished: false
             };
-            this.tableData.push(data);
+            this.tableData.unshift(data);
         },
         rowStyleName({
             row
