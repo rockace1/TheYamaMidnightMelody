@@ -64,6 +64,7 @@
         <el-row>
             <el-dialog
                 title="编辑模板"
+                width="90%"
                 :visible.sync="dialogFormVisible"
                 :close-on-click-modal="false"
                 :close-on-press-escape="false"
@@ -101,6 +102,7 @@
 <script lang="ts">
 import Vue from "vue";
 import moment from "moment";
+import Kit from "../../core/common/Kit";
 import ColumnEditor from "../components/ColumnEditor.vue";
 // eslint-disable-next-line no-unused-vars
 import { Template, Column } from "../../core/entity/Model";
@@ -252,6 +254,40 @@ export default Vue.extend({
             if (this.isEmpty(data.columns) || data.columns.length < 1) {
                 messenger.$warning("列定义不能为空", this);
                 return false;
+            }
+            for (let i = 0; i < data.columns.length; i++) {
+                let column = data.columns[i];
+                if (Kit.isCustom(column.type)) {
+                    if (Kit.isNull(column.fmt)) {
+                        messenger.$warning(`第${i+1}列自定格式不能为空`, this);
+                        return false;
+                    }
+                } else if (Kit.isFraction(column.type)) {
+                    if (
+                        Kit.isNull(column.prop) ||
+                        Kit.isNull(column.prop!.digits)
+                    ) {
+                        messenger.$warning(`第${i+1}列分母位数不能为空`, this);
+                        return false;
+                    }
+                } else if (Kit.isDecimal(column.type)) {
+                    if (
+                        Kit.isNull(column.prop) ||
+                        Kit.isNull(column.prop!.decimalPlaces)
+                    ) {
+                        messenger.$warning(`第${i+1}列小数位数不能为空`, this);
+                        return false;
+                    }
+                    if (Kit.isCurrency(column.type)) {
+                        if (Kit.isNull(column.prop!.symbol)) {
+                            messenger.$warning(
+                                `第${i+1}列货币符号不能为空`,
+                                this
+                            );
+                            return false;
+                        }
+                    }
+                }
             }
             if (this.isEmpty(data.delimiter)) {
                 messenger.$warning("模板分隔符不能为空", this);

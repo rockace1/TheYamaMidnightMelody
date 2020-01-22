@@ -4,13 +4,23 @@ export interface Doc {
     finished: boolean;
     tempId?: number;
     tempName?: string;
-    tempIndex?:number;
+    tempIndex?: number;
+}
+
+export interface ColumnProp {
+    decimalPlaces?: number;
+    symbol?: string;
+    isNum?: boolean;
+    digits?: number;
 }
 
 export interface Column {
     tempId?: number;
     name?: string;
     type: number;
+    fmt?: string;
+    prop_str?: string;
+    prop?: ColumnProp;
 }
 
 export interface Template {

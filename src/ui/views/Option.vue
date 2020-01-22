@@ -18,7 +18,7 @@
                 ></el-input>
             </el-form-item>
             <el-form-item label="重置软件" style="text-align:left">
-                <el-switch v-model="form[keys['CLEAN']]"></el-switch>
+                <el-switch v-model="form[keys['CLEAN']]" :active-value="1" :inactive-value="0"></el-switch>
             </el-form-item>
             <el-form-item style="text-align:right">
                 <el-button type="primary" @click="save()">保存</el-button>
@@ -42,7 +42,7 @@ export default Vue.extend({
             form: {
                 [OptionKey.BASE_FOLDER]: "",
                 [OptionKey.EXT]: "",
-                [OptionKey.CLEAN]: false
+                [OptionKey.CLEAN]: 0
             }
         };
         return result;
@@ -78,8 +78,7 @@ export default Vue.extend({
                     break;
                 }
                 case OptionKey.CLEAN: {
-                    this.form[OptionKey.CLEAN] =
-                        option.value === "1" ? true : false;
+                    this.form[OptionKey.CLEAN] = Number(option.value);
                     break;
                 }
             }

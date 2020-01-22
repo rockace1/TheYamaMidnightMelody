@@ -33,4 +33,14 @@ export default class ColumnTable extends Model<ColumnTable>{
     @IsInt
     @Column(DataType.INTEGER)
     type!: number;
+
+    @AllowNull(true)
+    @Comment('格式')
+    @Column(DataType.STRING)
+    fmt?: string;
+
+    @AllowNull(true)
+    @Comment('格式属性')
+    @Column(DataType.STRING)
+    prop_str?: string;
 }

@@ -2,9 +2,10 @@ import { Sequelize } from 'sequelize-typescript';
 import rdb from '../connection/Rdb';
 import ColumnTable from '../table/ColumnTable';
 import TemplateTable from '../table/TemplateTable';
-import { Template, Column } from '../entity/Model';
+import { Template, Column, ColumnProp } from '../entity/Model';
 import Page from '../common/Page';
 import MelodyException from '../common/Exception';
+import Kit from '../common/Kit';
 
 export interface TemplateRepo {
     save(data: Template): Promise<void>;
@@ -117,7 +118,12 @@ const TemplateRepoImpl: TemplateRepo = {
             }
             let columns: Column[] = [];
             for (let col of data.columns) {
-                let c = { type: col.type, name: col.name, tempId: col.tempId };
+                let c: Column = { type: col.type, name: col.name, tempId: col.tempId };
+                if (Kit.isNotNull(col.prop_str)) {
+                    let prop: ColumnProp = JSON.parse(col.prop_str!);
+                    c.prop = prop;
+                    c.prop_str = col.prop_str;
+                }
                 columns.push(c);
             }
             return { columns: columns, name: data.name, delimiter: data.delimiter, id: data.id, date: data.date };
@@ -135,13 +141,6 @@ function trans(source: TemplateTable[]): Template[] {
         array.push(temp);
     }
     return array;
-}
-
-function prepareName(sourceName: string): string {
-    if (sourceName.length > 250) {
-        sourceName = sourceName.substring(0, 250);
-    }
-    return sourceName + "_copy";
 }
 
 export default TemplateRepoImpl;

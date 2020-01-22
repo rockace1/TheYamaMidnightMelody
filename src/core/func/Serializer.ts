@@ -1,7 +1,7 @@
 import { default as Excel, Workbook, Worksheet, Row, Cell, FillPattern, Border } from 'exceljs';
 import { Template, Column } from '../entity/Model';
 import kit from '../common/Kit';
-import ColumnType from '../common/Constant';
+import formater from './Formater';
 
 const MAX_ROW: number = 500000;
 const SHEET_NAME_PREFIX = 'SHEET_';
@@ -36,16 +36,14 @@ const SerializerImpl: Serializer = {
             if (kit.isBlank(value)) {
                 continue;
             }
-            let col = template.columns[i];
-            let type = 0;
-            if (kit.isNotNull(col)) {
-                type = col.type;
-                if (type === ColumnType[1].value) {
-                    value = Number(value);
-                }
+            let column = template.columns[i];
+            let fmt = undefined;
+            if (kit.isNotNull(column)) {
+                fmt = column.fmt;
+                value = formater.getValue(value, column);
             }
             let cell: Cell = row.getCell(i + 1);
-            cell.style.numFmt = kit.getFmt(type);
+            cell.style.numFmt = fmt;
             cell.value = value;
         }
         row.commit();
@@ -98,7 +96,7 @@ function createSheet(workbook: Workbook, name: string, columns: Array<Column>): 
         if (col.name) {
             cell.value = col.name;
         }
-        cell.style.numFmt = kit.getFmt(col.type);
+        cell.style.numFmt = col.fmt;
     }
     return sheet;
 }

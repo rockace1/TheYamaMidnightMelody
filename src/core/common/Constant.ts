@@ -1,7 +1,6 @@
 export interface ColumnType {
     readonly name: string;
     readonly value: number;
-    readonly fmt: string;
 }
 
 export enum OptionKey {
@@ -10,19 +9,46 @@ export enum OptionKey {
     CLEAN = 3,
 }
 
+export enum ColumnTypeEnum {
+    GENERAL = 0,
+    NUM = 1,
+    TEXT = 2,
+    CURRENCY = 3,
+    ACCOUNTING = 4,
+    PERCENT = 5,
+    FRACTION = 6,
+    SCIENTIFIC_NOTATION = 7,
+    CUSTOM = 8,
+}
+
 const ColumnTypeImpl: ReadonlyArray<ColumnType> = [
     {
         name: "常规",
-        value: 0,
-        fmt: 'General'
+        value: ColumnTypeEnum.GENERAL,
     }, {
         name: "数值",
-        value: 1,
-        fmt: '0.0000_);(0.0000)'
+        value: ColumnTypeEnum.NUM,
     }, {
         name: "文本",
-        value: 2,
-        fmt: '@'
+        value: ColumnTypeEnum.TEXT,
+    }, {
+        name: "货币",
+        value: ColumnTypeEnum.CURRENCY,
+    }, {
+        name: "会计专用",
+        value: ColumnTypeEnum.ACCOUNTING,
+    }, {
+        name: "百分比",
+        value: ColumnTypeEnum.PERCENT,
+    }, {
+        name: "分数",
+        value: ColumnTypeEnum.FRACTION,
+    }, {
+        name: "科学计数",
+        value: ColumnTypeEnum.SCIENTIFIC_NOTATION,
+    }, {
+        name: "自定义",
+        value: ColumnTypeEnum.CUSTOM,
     }
 ];
 

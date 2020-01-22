@@ -1,4 +1,4 @@
-import ColumnType from './Constant';
+import { ColumnTypeEnum } from './Constant';
 
 const Kit = {
     isNull(arg: any): boolean {
@@ -25,9 +25,27 @@ const Kit = {
     isNotEmpty(array: any[]): boolean {
         return !this.isEmpty(array);
     },
-    getFmt(type: number): string {
-        return ColumnType[type].fmt;
-    }
+    isCustom(type: number): boolean {
+        return type === ColumnTypeEnum.CUSTOM;
+    },
+    isDecimal(type: number): boolean {
+        return (
+            type === ColumnTypeEnum.NUM ||
+            type === ColumnTypeEnum.CURRENCY ||
+            type === ColumnTypeEnum.ACCOUNTING ||
+            type === ColumnTypeEnum.PERCENT ||
+            type === ColumnTypeEnum.SCIENTIFIC_NOTATION
+        );
+    },
+    isFraction(type: number): boolean {
+        return type === ColumnTypeEnum.FRACTION;
+    },
+    isCurrency(type: number): boolean {
+        return (
+            type === ColumnTypeEnum.CURRENCY ||
+            type === ColumnTypeEnum.ACCOUNTING
+        );
+    },
 }
 
 export default Kit;
