@@ -1,5 +1,5 @@
 import Connector from '../connection/Rdb';
-import { Template, Doc, Option } from '../entity/Model';
+import { Template, Doc, Option, Column } from '../entity/Model';
 import { OptionKey } from "../../core/common/Constant";
 import Page from '../common/Page';
 import templateRepo from '../repo/TemplateRepo';
@@ -58,11 +58,6 @@ const ServiceImpl: Service = {
     },
 
     async createTemplate(data: Template): Promise<void> {
-        for (let c of data.columns) {
-            if (Kit.isNotNull(c.prop)) {
-                c.prop_str = JSON.stringify(c.prop);
-            }
-        }
         await templateRepo.save(data);
     },
 
@@ -88,11 +83,6 @@ const ServiceImpl: Service = {
         let exist: Template | null = await templateRepo.find(id);
         if (exist === null) {
             throw new MelodyException(`template ${id} not exist.`);
-        }
-        for (let c of data.columns) {
-            if (Kit.isNotNull(c.prop)) {
-                c.prop_str = JSON.stringify(c.prop);
-            }
         }
         await templateRepo.update(data);
     },

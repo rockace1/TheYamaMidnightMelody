@@ -4,6 +4,7 @@ import ColumnTable from '../table/ColumnTable';
 import TemplateTable from '../table/TemplateTable';
 import { Template, Column, ColumnProp } from '../entity/Model';
 import Page from '../common/Page';
+import formater from '../func/Formater';
 import MelodyException from '../common/Exception';
 import Kit from '../common/Kit';
 
@@ -26,7 +27,7 @@ const TemplateRepoImpl: TemplateRepo = {
                 throw new MelodyException(`empty column in template.`);
             }
             for (let c of array) {
-                c.tempId = result.id;
+                executeColumnData(c, result.id);
                 await ColumnTable.create<ColumnTable>(c, { transaction: t });
             }
         }).catch((err: Error) => {
@@ -64,9 +65,12 @@ const TemplateRepoImpl: TemplateRepo = {
             if (array === undefined) {
                 throw new MelodyException(`empty column in template.`);
             }
+            let i = 1;
             for (let c of array) {
-                c.tempId = id;
+                executeColumnData(c, id);
+                console.log(`prepare save [${i}]`);
                 await ColumnTable.create<ColumnTable>(c, { transaction: t });
+                console.log(`[${i++}]saved column:${JSON.stringify(c)}`);
             }
         }).catch((err: Error) => {
             throw new MelodyException(`update template[${data.id}] error.`, err);
@@ -118,7 +122,7 @@ const TemplateRepoImpl: TemplateRepo = {
             }
             let columns: Column[] = [];
             for (let col of data.columns) {
-                let c: Column = { type: col.type, name: col.name, tempId: col.tempId };
+                let c: Column = { type: col.type, name: col.name, tempId: col.tempId, fmt: col.fmt };
                 if (Kit.isNotNull(col.prop_str)) {
                     let prop: ColumnProp = JSON.parse(col.prop_str!);
                     c.prop = prop;
@@ -141,6 +145,15 @@ function trans(source: TemplateTable[]): Template[] {
         array.push(temp);
     }
     return array;
+}
+
+function executeColumnData(column: Column, tempId: number): void {
+    column.tempId = tempId;
+    column.fmt = formater.getFmt(column);
+    if (Kit.isNotNull(column.prop)) {
+        column.prop_str = JSON.stringify(column.prop);
+        column.prop = undefined;
+    }
 }
 
 export default TemplateRepoImpl;
