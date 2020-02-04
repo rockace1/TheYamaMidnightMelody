@@ -68,9 +68,7 @@ const TemplateRepoImpl: TemplateRepo = {
             let i = 1;
             for (let c of array) {
                 executeColumnData(c, id);
-                console.log(`prepare save [${i}]`);
                 await ColumnTable.create<ColumnTable>(c, { transaction: t });
-                console.log(`[${i++}]saved column:${JSON.stringify(c)}`);
             }
         }).catch((err: Error) => {
             throw new MelodyException(`update template[${data.id}] error.`, err);
@@ -149,11 +147,11 @@ function trans(source: TemplateTable[]): Template[] {
 
 function executeColumnData(column: Column, tempId: number): void {
     column.tempId = tempId;
-    column.fmt = formater.getFmt(column);
     if (Kit.isNotNull(column.prop)) {
         column.prop_str = JSON.stringify(column.prop);
         column.prop = undefined;
     }
+    column.fmt = formater.getFmt(column);
 }
 
 export default TemplateRepoImpl;
