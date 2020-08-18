@@ -8,6 +8,9 @@ function getDigitsStr(num: string, padding: string): string {
     for (let i = 0; i < decimalPlaces; i++) {
         mutable += padding;
     }
+    if (decimalPlaces > 0) {
+        mutable = '.' + mutable;
+    }
     return mutable;
 }
 
@@ -23,7 +26,7 @@ const Formater = {
             case ColumnTypeEnum.NUM: {
                 let prop = JSON.parse(column.prop_str!);
                 let mutable = getDigitsStr(prop.decimalPlaces, '0');
-                fmt = `0.${mutable}_);(0.${mutable})`;
+                fmt = `0${mutable}_);(0${mutable})`;
                 break;
             }
             case ColumnTypeEnum.TEXT: {
@@ -34,32 +37,36 @@ const Formater = {
                 let prop = JSON.parse(column.prop_str!);
                 let symbol = prop.symbol;
                 let mutable = getDigitsStr(prop.decimalPlaces, '0');
-                fmt = `${symbol}#,##0.${mutable};${symbol}-#,##0.${mutable}`;
+                fmt = `${symbol}#,##0${mutable};${symbol}-#,##0${mutable}`;
                 break;
             }
             case ColumnTypeEnum.ACCOUNTING: {
                 let prop = JSON.parse(column.prop_str!);
                 let symbol = prop.symbol;
                 let mutable = getDigitsStr(prop.decimalPlaces, '0');
-                fmt = `_ ${symbol}* #,##0.${mutable}_ ;_ ${symbol}* -#,##0.${mutable}_ ;_ ${symbol}* "-"??_ ;_ @_ `;
+                fmt = `_ ${symbol}* #,##0${mutable}_ ;_ ${symbol}* -#,##0${mutable}_ ;_ ${symbol}* "-"??_ ;_ @_ `;
                 break;
             }
             case ColumnTypeEnum.PERCENT: {
                 let prop = JSON.parse(column.prop_str!);
                 let mutable = getDigitsStr(prop.decimalPlaces, '0');
-                fmt = `0.${mutable}%`;
+                fmt = `0${mutable}%`;
                 break;
             }
             case ColumnTypeEnum.FRACTION: {
                 let prop = JSON.parse(column.prop_str!);
                 let mutable = getDigitsStr(prop.digits, '?');
-                fmt = `# ${mutable}/${mutable}`;
+                if (mutable === '') {
+                    fmt = `# ?/?`;
+                } else {
+                    fmt = `# ${mutable}/${mutable}`;
+                }
                 break;
             }
             case ColumnTypeEnum.SCIENTIFIC_NOTATION: {
                 let prop = JSON.parse(column.prop_str!);
                 let mutable = getDigitsStr(prop.decimalPlaces, '0');
-                fmt = `0.${mutable}E+00`;
+                fmt = `0${mutable}E+00`;
                 break;
             }
             case ColumnTypeEnum.CUSTOM: {
