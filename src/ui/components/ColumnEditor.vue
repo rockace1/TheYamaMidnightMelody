@@ -79,8 +79,7 @@ import {
 export default Vue.extend({
     props: {
         i: Number,
-        col: Object,
-        colProp: Array
+        col: Object
     },
     methods: {
         change(index: number, col: Column): void {
@@ -103,9 +102,6 @@ export default Vue.extend({
                 col.prop = p;
             }
             this.$emit("change", index, col);
-        },
-        changeProp(index: number, prop: string): void {
-            console.log(`index:${index},prop:${prop}`);
         },
         add(index: number): void {
             this.$emit("add", index);
@@ -135,10 +131,26 @@ export default Vue.extend({
             digits: number | undefined;
         } = {
             colType: ColumnTypeData,
-            decimalPlaces: 2,
-            symbol: "¥",
-            isNum: false,
-            digits: 2
+            decimalPlaces:
+                Kit.isNotNull(this.col.prop) &&
+                Kit.isNotNull(this.col.prop.decimalPlaces)
+                    ? this.col.prop.decimalPlaces
+                    : 2,
+            symbol:
+                Kit.isNotNull(this.col.prop) &&
+                Kit.isNotNull(this.col.prop.symbol)
+                    ? this.col.prop.symbol
+                    : "¥",
+            isNum:
+                Kit.isNotNull(this.col.prop) &&
+                Kit.isNotNull(this.col.prop.isNum)
+                    ? this.col.prop.isNum
+                    : false,
+            digits:
+                Kit.isNotNull(this.col.prop) &&
+                Kit.isNotNull(this.col.prop.digits)
+                    ? this.col.prop.digits
+                    : 2
         };
         return result;
     }

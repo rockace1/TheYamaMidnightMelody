@@ -174,7 +174,10 @@ export default Vue.extend({
                         columns.push({
                             name: c.name,
                             type: c.type,
-                            tempId: c.tempId
+                            tempId: c.tempId,
+                            fmt: c.fmt,
+                            prop: c.prop,
+                            prop_str: c.prop_str
                         });
                     }
                     this.form = {
@@ -259,7 +262,10 @@ export default Vue.extend({
                 let column = data.columns[i];
                 if (Kit.isCustom(column.type)) {
                     if (Kit.isNull(column.fmt)) {
-                        messenger.$warning(`第${i+1}列自定格式不能为空`, this);
+                        messenger.$warning(
+                            `第${i + 1}列自定格式不能为空`,
+                            this
+                        );
                         return false;
                     }
                 } else if (Kit.isFraction(column.type)) {
@@ -267,7 +273,10 @@ export default Vue.extend({
                         Kit.isNull(column.prop) ||
                         Kit.isNull(column.prop!.digits)
                     ) {
-                        messenger.$warning(`第${i+1}列分母位数不能为空`, this);
+                        messenger.$warning(
+                            `第${i + 1}列分母位数不能为空`,
+                            this
+                        );
                         return false;
                     }
                 } else if (Kit.isDecimal(column.type)) {
@@ -275,13 +284,16 @@ export default Vue.extend({
                         Kit.isNull(column.prop) ||
                         Kit.isNull(column.prop!.decimalPlaces)
                     ) {
-                        messenger.$warning(`第${i+1}列小数位数不能为空`, this);
+                        messenger.$warning(
+                            `第${i + 1}列小数位数不能为空`,
+                            this
+                        );
                         return false;
                     }
                     if (Kit.isCurrency(column.type)) {
                         if (Kit.isNull(column.prop!.symbol)) {
                             messenger.$warning(
-                                `第${i+1}列货币符号不能为空`,
+                                `第${i + 1}列货币符号不能为空`,
                                 this
                             );
                             return false;

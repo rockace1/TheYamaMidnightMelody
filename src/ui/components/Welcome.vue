@@ -35,9 +35,11 @@
                             v-if="scope.row.finished||running"
                             disabled
                         >
-                            <template v-for="(template,j) in templateData">
-                                <el-option :key="j" :label="template.name" :value="j"></el-option>
-                            </template>
+                            <el-option
+                                :key="scope.row.tempIndex"
+                                :label="scope.row.tempName"
+                                :value="scope.row.tempIndex"
+                            ></el-option>
                         </el-select>
                         <el-select
                             v-model="scope.row.tempIndex"
@@ -208,11 +210,22 @@ export default Vue.extend({
         flushTemplate(): void {
             TempCtrl.all()
                 .then((data: Template[]) => {
+                    this.resetTableTemplate();
                     this.templateData = data;
                 })
                 .catch(() => {
                     messenger.$error("获取模板信息异常", this);
                 });
+        },
+        resetTableTemplate(): void {
+            for (let data of this.tableData) {
+                if (data.finished) {
+                    continue;
+                }
+                data.tempId = undefined;
+                data.tempName = undefined;
+                data.tempIndex = undefined;
+            }
         }
     },
     mounted: function() {
